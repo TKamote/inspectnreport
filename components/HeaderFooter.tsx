@@ -1,17 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-
-// Import types from types.ts
-export interface HeaderData {
-  company: string;
-  createdBy: string;
-  contact: string;
-  reportFor: string;
-  typeOfReport: string;
-  date: string;
-}
-
-export type SetHeaderData = (field: keyof HeaderData, value: string) => void;
+import { HeaderData, SetHeaderData } from "../types/types";
 
 // Define props interface
 interface HeaderFooterProps {
@@ -19,11 +8,16 @@ interface HeaderFooterProps {
   setHeaderData: SetHeaderData;
 }
 
-// Define the HeaderFooter component
 const HeaderFooter: React.FC<HeaderFooterProps> = ({
   headerData,
   setHeaderData,
 }) => {
+  // Auto-generate the date when component mounts
+  useEffect(() => {
+    const currentDate = new Date().toLocaleDateString();
+    setHeaderData("date", currentDate);
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Company</Text>
@@ -33,6 +27,7 @@ const HeaderFooter: React.FC<HeaderFooterProps> = ({
         value={headerData.company}
         onChangeText={(text) => setHeaderData("company", text)}
       />
+
       <Text style={styles.label}>Created By</Text>
       <TextInput
         style={styles.input}
@@ -40,13 +35,7 @@ const HeaderFooter: React.FC<HeaderFooterProps> = ({
         value={headerData.createdBy}
         onChangeText={(text) => setHeaderData("createdBy", text)}
       />
-      <Text style={styles.label}>Contact</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter contact details"
-        value={headerData.contact}
-        onChangeText={(text) => setHeaderData("contact", text)}
-      />
+
       <Text style={styles.label}>Report For</Text>
       <TextInput
         style={styles.input}
@@ -54,6 +43,7 @@ const HeaderFooter: React.FC<HeaderFooterProps> = ({
         value={headerData.reportFor}
         onChangeText={(text) => setHeaderData("reportFor", text)}
       />
+
       <Text style={styles.label}>Type of Report</Text>
       <TextInput
         style={styles.input}
@@ -61,37 +51,29 @@ const HeaderFooter: React.FC<HeaderFooterProps> = ({
         value={headerData.typeOfReport}
         onChangeText={(text) => setHeaderData("typeOfReport", text)}
       />
-      <Text style={styles.label}>Date</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter date"
-        value={headerData.date}
-        onChangeText={(text) => setHeaderData("date", text)}
-      />
+      {/* Date is auto-generated, no input field needed */}
     </View>
   );
 };
 
-// Styles for HeaderFooter
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
+    padding: 5, // Reduced from default padding
+    marginBottom: 10, // Reduced from default margin
   },
   label: {
-    fontSize: 14,
+    fontSize: 14, // Reduced from default 16
+    marginBottom: 3, // Reduced from default 5
     fontWeight: "bold",
-    marginBottom: 5,
   },
   input: {
-    width: "100%",
-    height: 40,
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 15,
+    borderRadius: 4,
+    padding: 8, // Reduced from default 10
+    marginBottom: 10, // Reduced from default 15
+    backgroundColor: "#f8f8f8",
   },
 });
 
-// Export the HeaderFooter component
 export default HeaderFooter;

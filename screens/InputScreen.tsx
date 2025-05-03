@@ -25,7 +25,6 @@ export default function InputScreen({ route }: { route: any }) {
   const [headerData, setHeaderData] = useState<HeaderData>({
     company: "",
     createdBy: "",
-    contact: "",
     reportFor: "",
     typeOfReport: "",
     date: "",
@@ -224,19 +223,21 @@ export default function InputScreen({ route }: { route: any }) {
           onRequestClose={() => setModalVisible(false)}
         >
           <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Fill in Header and Footer</Text>
-              <HeaderFooter
-                headerData={headerData} // Pass the correct props
-                setHeaderData={updateHeaderData} // Pass the correct props
-              />
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={closeModalAndGeneratePDF}
-              >
-                <Text style={styles.modalButtonText}>Generate PDF</Text>
-              </TouchableOpacity>
-            </View>
+            <ScrollView contentContainerStyle={styles.modalScrollContent}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Fill in Header and Footer</Text>
+                <HeaderFooter
+                  headerData={headerData} // Pass the correct props
+                  setHeaderData={updateHeaderData} // Pass the correct props
+                />
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={closeModalAndGeneratePDF}
+                >
+                  <Text style={styles.modalButtonText}>Generate PDF</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
         </Modal>
       </ScrollView>
@@ -376,16 +377,23 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-start", // Changed from center to flex-start
+  },
+  modalScrollContent: {
+    flexGrow: 1,
+    justifyContent: "flex-start", // Changed from center to flex-start
+    alignItems: "center",
+    width: "100%",
+    paddingTop: 50, // Add some padding at the top
+    paddingBottom: 30,
   },
   modalContent: {
     width: "90%",
     backgroundColor: "#fff",
     borderRadius: 10,
     padding: 20,
-    alignItems: "center",
+    maxHeight: "80%",
   },
   modalTitle: {
     fontSize: 18,

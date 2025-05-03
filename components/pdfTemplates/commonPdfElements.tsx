@@ -13,37 +13,67 @@ export const generateCommonStyles = (): string => {
       padding: 40px 30px;
     }
     .header {
-      margin-bottom: 30px;
+      margin-bottom: 20px; /* Reduced from 30px */
       border-bottom: 1px solid #ddd;
-      padding-bottom: 20px;
+      padding-bottom: 15px; /* Reduced from 20px */
     }
+    
+    /* Add these header row styles */
+    .header-top-row, .header-bottom-row {
+      display: flex;
+      margin-bottom: 8px; /* Reduced margin */
+      width: 100%;
+    }
+    
+    .header-bottom-row {
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .company-section {
+      display: flex;
+      align-items: center;
+    }
+    
+    .report-for-section {
+      display: flex;
+      align-items: center;
+    }
+    
+    .date-section {
+      display: flex;
+      align-items: center;
+    }
+    
+    .header-label {
+      font-weight: bold;
+      margin-right: 5px;
+    }
+    
+    .header-value {
+      margin-right: 15px;
+    }
+    
+    .spacer {
+      display: inline-block;
+      width: 20px; /* Reduced from 30px */
+    }
+    
     .minimal-header {
-      margin-bottom: 30px;
+      margin-bottom: 20px; /* Reduced from 30px */
       text-align: center;
     }
-    .company-info {
-      float: left;
-      width: 60%;
-    }
-    .report-info {
-      float: right;
-      width: 40%;
-      text-align: right;
-    }
-    .company-name {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
+    
     .report-title {
-      font-size: 22px;
+      font-size: 20px; /* Reduced from 22px */
       font-weight: bold;
-      margin-top: 10px;
-      margin-bottom: 20px;
+      margin-top: 5px;
+      margin-bottom: 8px; /* Reduced from 10px */
       clear: both;
       text-align: center;
-      padding-top: 10px;
+      padding-top: 3px; /* Reduced from 5px */
     }
+    
     .card {
       border: 1px solid #ccc;
       border-radius: 5px;
@@ -108,11 +138,15 @@ export const generateCommonStyles = (): string => {
       font-size: 12px;
       color: #666;
     }
-    .page-number {
-      text-align: center;
-      margin-top: 10px;
+      .developer {
       font-size: 10px;
-      color: #999;
+      color: #666;
+      float: left;
+      }
+    .page-number {
+      font-size: 10px;
+      color: #666;
+      float: right;
     }
     @media print {
       .page-break {
@@ -128,31 +162,51 @@ export const generateHeaderHTML = (headerData: HeaderData): string => {
 
   return `
     <div class="header">
-      <div class="company-info">
-        <div class="company-name">${headerData.company || "Company Name"}</div>
-        <div>Created By: ${headerData.createdBy || "Inspector"}</div>
-        <div>Contact: ${headerData.contact || "Contact Information"}</div>
+      <div class="header-top-row">
+        <div class="company-section">
+          <span class="header-label">Company:</span> 
+          <span class="header-value">${
+            headerData.company || "Company Name"
+          }</span>
+          <span class="spacer"></span>
+          <span class="header-label">Created By:</span> 
+          <span class="header-value">${
+            headerData.createdBy || "Inspector"
+          }</span>
+        </div>
       </div>
-      <div class="report-info">
-        <div>Report For: ${headerData.reportFor || "Client"}</div>
-        <div>Date: ${reportDate}</div>
+      
+      <div class="header-bottom-row">
+        <div class="report-for-section">
+          <span class="header-label">Report For:</span> 
+          <span class="header-value">${headerData.reportFor || "Client"}</span>
+        </div>
+        <div class="date-section">
+          <span class="header-label">Date:</span> 
+          <span class="header-value">${reportDate}</span>
+        </div>
       </div>
+      
+      <div class="report-title">${
+        headerData.typeOfReport || "Inspection Report"
+      }</div>
     </div>
-    
-    <div class="report-title">${
-      headerData.typeOfReport || "Inspection Report"
-    }</div>
   `;
 };
 
 // Generate footer HTML
-export const generateFooterHTML = (reportType: string): string => {
+export const generateFooterHTML = (
+  reportType: string,
+  currentPage: number = 1,
+  totalPages: number = 1
+): string => {
   return `
     <div class="footer">
-      <div>Generated on: ${new Date().toLocaleString()}</div>
-      <div>Report Type: ${reportType}</div>
+      <div class="developer">Developed by: David Onquit</div>
+      <div class="page-number">
+        Page ${currentPage} of ${totalPages}
+      </div>
+      <div style="clear: both;"></div>
     </div>
-    
-    <div class="page-number">Page 1</div>
   `;
 };
