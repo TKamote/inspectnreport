@@ -2,7 +2,8 @@ import React from "react";
 import { StyleSheet, Text, View, FlatList, TouchableOpacity } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import InputScreen from "./InputScreen"; // Import the InputScreen
+import InputScreen from "./screens/InputScreen"; // Import the InputScreen
+import * as Linking from "expo-linking"; // Import Linking to open the PDF
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +28,11 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
     { id: "6", name: "A4 Portrait (4x6)" },
   ];
 
+  const openSamplePDF = () => {
+    const pdfUrl = "https://example.com/sample-templates.pdf"; // Replace with your actual PDF URL
+    Linking.openURL(pdfUrl); // Open the PDF in the default browser
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Select a Template</Text>
@@ -42,6 +48,11 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
           </TouchableOpacity>
         )}
       />
+
+      {/* Sample PDF Button */}
+      <TouchableOpacity style={styles.sampleButton} onPress={openSamplePDF}>
+        <Text style={styles.sampleButtonText}>View Sample PDFs</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -55,7 +66,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "bold",
     marginBottom: 20,
   },
@@ -68,7 +79,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   templateText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "500",
+  },
+  sampleButton: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: "#007BFF",
+    borderRadius: 5,
+    alignItems: "center",
+    width: "100%",
+  },
+  sampleButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
