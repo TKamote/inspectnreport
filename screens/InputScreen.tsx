@@ -16,6 +16,8 @@ import { Ionicons } from "@expo/vector-icons"; // Import Ionicons for icons
 import * as ImagePicker from "expo-image-picker"; // Import ImagePicker
 import HeaderFooter from "../components/HeaderFooter";
 import { HeaderData, SetHeaderData } from "../types/types"; // Import the types
+import { generatePDF } from "../components/PDFGenerator";
+import { PDFTemplate } from "../types/pdfTypes";
 
 export default function InputScreen({ route }: { route: any }) {
   const { template } = route.params;
@@ -67,7 +69,13 @@ export default function InputScreen({ route }: { route: any }) {
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
-              const timestamp = new Date().toLocaleString(); // Generate timestamp
+              const timestamp = new Date().toLocaleString(undefined, {
+                year: "numeric",
+                month: "numeric",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              }); // Generate timestamp
               updateCard(index, "photo", result.assets[0].uri);
               updateCard(index, "timestamp", timestamp);
             }
@@ -83,7 +91,13 @@ export default function InputScreen({ route }: { route: any }) {
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
-              const timestamp = new Date().toLocaleString(); // Generate timestamp
+              const timestamp = new Date().toLocaleString(undefined, {
+                year: "numeric",
+                month: "numeric",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              }); // Generate timestamp
               updateCard(index, "photo", result.assets[0].uri);
               updateCard(index, "timestamp", timestamp);
             }
@@ -97,8 +111,8 @@ export default function InputScreen({ route }: { route: any }) {
 
   const handleGeneratePDF = () => {
     Alert.alert(
-      "Add Header and Footer?",
-      "Do you want to fill in the header and footer before generating the PDF?",
+      "Add Header to Report?",
+      "Do you want to include company and contact information in your report?",
       [
         {
           text: "Yes",
@@ -107,8 +121,13 @@ export default function InputScreen({ route }: { route: any }) {
         {
           text: "No",
           onPress: () => {
-            // Proceed to generate the PDF with default or empty header/footer
-            alert("Generate PDF with default header/footer");
+            // Generate PDF without header
+            generatePDF({
+              cards,
+              headerData,
+              template: template as PDFTemplate,
+              includeHeader: false,
+            });
           },
         },
       ]
@@ -117,7 +136,13 @@ export default function InputScreen({ route }: { route: any }) {
 
   const closeModalAndGeneratePDF = () => {
     setModalVisible(false);
-    alert(`Generating PDF with header: ${JSON.stringify(headerData)}`);
+    // Generate PDF with header
+    generatePDF({
+      cards,
+      headerData,
+      template: template as PDFTemplate,
+      includeHeader: true,
+    });
   };
 
   return (
