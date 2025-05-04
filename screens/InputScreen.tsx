@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons"; // Import Ionicons for icons
 import * as ImagePicker from "expo-image-picker"; // Import ImagePicker
 import HeaderFooter from "../components/HeaderFooter";
 import { HeaderData, SetHeaderData } from "../types/types"; // Import the types
-import { generatePDF } from "../components/PDFGenerator";
+import { generatePDF } from "../components/PDFGenerator"; // Import generatePDF
 import { PDFTemplate } from "../types/pdfTypes";
 
 export default function InputScreen({ route }: { route: any }) {
@@ -225,7 +225,9 @@ export default function InputScreen({ route }: { route: any }) {
           <View style={styles.modalContainer}>
             <ScrollView contentContainerStyle={styles.modalScrollContent}>
               <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Fill in Header and Footer</Text>
+                <Text style={styles.modalTitle}>
+                  Fill in Header Information
+                </Text>
                 <HeaderFooter
                   headerData={headerData} // Pass the correct props
                   setHeaderData={updateHeaderData} // Pass the correct props

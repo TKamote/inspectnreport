@@ -1,5 +1,11 @@
 import React from "react";
-import { StyleSheet, Text, View, FlatList, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import InputScreen from "./screens/InputScreen"; // Import the InputScreen
@@ -20,12 +26,12 @@ export default function App() {
 
 const HomeScreen = ({ navigation }: { navigation: any }) => {
   const templates = [
-    { id: "1", name: "A4 Portrait (2x2)" },
-    { id: "2", name: "A4 Portrait (2x3)" },
-    { id: "3", name: "A4 Landscape (3x2)" },
-    { id: "4", name: "A4 Landscape (4x2)" },
-    { id: "5", name: "A4 Landscape (5x3)" },
-    { id: "6", name: "A4 Portrait (4x6)" },
+    { id: "1", name: "A4 Portrait (2x2)", value: "A4Portrait2x2" },
+    { id: "2", name: "A4 Portrait (2x3)", value: "A4Portrait2x3" },
+    { id: "3", name: "A4 Landscape (3x2)", value: "A4Landscape3x2" },
+    { id: "4", name: "A4 Landscape (4x2)", value: "A4Landscape4x2" },
+    { id: "5", name: "A4 Landscape (5x3)", value: "A4Landscape5x3" },
+    { id: "6", name: "A4 Portrait (4x6)", value: "A4Portrait4x6" },
   ];
 
   const openSamplePDF = () => {
@@ -42,7 +48,9 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.templateButton}
-            onPress={() => navigation.navigate("Input", { template: item.name })}
+            onPress={() =>
+              navigation.navigate("Input", { template: item.value })
+            }
           >
             <Text style={styles.templateText}>{item.name}</Text>
           </TouchableOpacity>

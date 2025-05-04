@@ -13,13 +13,13 @@ function truncateText(text: string, maxLength: number = 300): string {
   return text.substring(0, maxLength) + "...";
 }
 
-export const generateA4Portrait2x2 = (
+export const generateA4Portrait2x3 = (
   cards: CardData[],
   headerData: HeaderData,
   includeHeader: boolean
 ): string => {
-  // Define cards per page (2x2 grid = 4 cards)
-  const cardsPerPage = 4;
+  // Define cards per page (2x3 grid = 6 cards)
+  const cardsPerPage = 6;
   const pageCount = Math.ceil(cards.length / cardsPerPage);
 
   // Generate the header HTML once to reuse
@@ -87,7 +87,7 @@ export const generateA4Portrait2x2 = (
         
         <div class="page-content">
           <div class="grid-container${
-            pageCards.length <= 2 ? " single-row" : ""
+            pageCards.length <= 3 ? " single-row" : ""
           }">
             ${pageCardItems}
           </div>
@@ -300,12 +300,13 @@ export const generateA4Portrait2x2 = (
           color: #333;
         }
         
-        /* A4 Portrait 2x2 specific styles */
+        /* A4 Portrait 2x3 specific styles */
         .grid-container {
           display: grid;
           grid-template-columns: 1fr 1fr;
+          grid-template-rows: 1fr 1fr 1fr; /* 3 rows */
           gap: 15px 50px;
-          margin-bottom: 2px; /* Reduce from 15px to 2px */
+          margin-bottom: 2px;
           width: 82%; 
           margin-left: auto;
           margin-right: auto;
@@ -316,11 +317,11 @@ export const generateA4Portrait2x2 = (
           margin-bottom: 60px;
         }
         
-        /* Image container with 3:4 aspect ratio */
+        /* Image container with 4:3 aspect ratio (landscape) */
         .image-container {
           position: relative;
           width: 100%;
-          padding-top: 133.33%; /* 3:4 ratio = 133.33% */
+          padding-top: 75%; /* 4:3 ratio = 75% (3/4 = 0.75) */
           overflow: hidden;
         }
 
@@ -346,7 +347,7 @@ export const generateA4Portrait2x2 = (
         .no-image {
           display: flex;
           width: 100%;
-          padding-top: 133.33%; /* Match the same ratio */
+          padding-top: 75%; /* Match the 4:3 ratio */
           position: relative;
         }
 
@@ -401,7 +402,7 @@ export const generateA4Portrait2x2 = (
           flex-direction: column;
           position: relative;
           margin-bottom: 8px; /* Reduce from 10px to 8px */
-          max-height: 120mm; /* Set explicit maximum height for each card */
+          max-height: 90mm; /* Reduced from 120mm */
         }
         
         /* Add this to the last page */

@@ -9,11 +9,11 @@ export interface CardData {
 
 export type PDFTemplate =
   | "A4Portrait2x2"
-  | "A4Landscape5x2"
+  | "A4Portrait2x3"
+  | "A4Landscape3x2"
   | "A4Landscape4x2"
-  | "A4Portrait3x3"
-  | "A4Landscape3x3"
-  | "A4Portrait1x1";
+  | "A4Landscape5x3"
+  | "A4Portrait4x6";
 
 export interface PDFGenerationOptions {
   cards: CardData[];

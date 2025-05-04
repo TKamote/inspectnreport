@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "jsx": "react-native",
+    "resolveJsonModule": true,
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules", "**/node_modules/*", "**/PDFGenerator.ts"]
+}
