@@ -30,7 +30,7 @@ export const generateA4Landscape3x2 = (
   // Generate HTML for all pages with page breaks
   let pagesHTML = "";
 
-  for (let page = 0; page < pageCount; page++) {
+  for (let page = 0; pageCount > page; page++) {
     // Get the cards for this page
     const startIndex = page * cardsPerPage;
     const pageCards = cards.slice(startIndex, startIndex + cardsPerPage);
@@ -154,6 +154,8 @@ export const generateA4Landscape3x2 = (
           overflow: hidden;
           page-break-after: avoid;
           page-break-inside: avoid;
+          /* Remove the dotted border */
+          /* border: 1px dashed #ccc; */
         }
 
         /* Fix for the last page specifically */
@@ -184,9 +186,9 @@ export const generateA4Landscape3x2 = (
           left: 0;
           right: 0;
           width: 90%;
-          height: 165mm; /* Adjusted for landscape */
+          height: 163mm; /* Try slightly reducing height */
           margin: 0 auto;
-          overflow: hidden; /* Keep this to prevent content spilling */
+          overflow: visible; /* Change from hidden to visible */
           padding-top: 5mm;
         }
 
@@ -272,6 +274,18 @@ export const generateA4Landscape3x2 = (
           position: relative;
           z-index: 15; /* Higher z-index for first three cards */
         }
+
+        /* Ensure second row cards are fully visible */
+        .grid-container > .card:nth-child(n+4) {
+          position: relative;
+          z-index: 5; /* Ensure second row has good z-index */
+        }
+
+        /* Ensure second row observations are fully visible */
+        .grid-container > .card:nth-child(n+4) .card-observations {
+          position: relative;
+          z-index: 6;
+        }
         
         /* Other elements should keep consistent proportions */
         .observations-title {
@@ -299,9 +313,9 @@ export const generateA4Landscape3x2 = (
           display: grid;
           grid-template-columns: 1fr 1fr 1fr; /* 3 columns */
           grid-template-rows: 1fr 1fr; /* 2 rows */
-          gap: 15px 30px; /* Adjusted gap for landscape layout */
+          gap: 5px 30px; /* Reduced vertical gap from 15px to 5px */
           margin-bottom: 2px;
-          width: 95%; /* Wider to use landscape space better */
+          width: 85%; /* Reduced from 95% to create more vertical space */
           margin-left: auto;
           margin-right: auto;
         }
@@ -311,11 +325,11 @@ export const generateA4Landscape3x2 = (
           margin-bottom: 60px;
         }
         
-        /* Image container with 16:9 aspect ratio (landscape) */
+        /* Image container with 4:3 aspect ratio */
         .image-container {
           position: relative;
           width: 100%;
-          padding-top: 56.25%; /* 16:9 ratio = 56.25% (9/16 = 0.5625) */
+          padding-top: 75%; /* 4:3 ratio = 75% (3/4 = 0.75) */
           overflow: hidden;
         }
 
@@ -341,7 +355,7 @@ export const generateA4Landscape3x2 = (
         .no-image {
           display: flex;
           width: 100%;
-          padding-top: 56.25%; /* Match the 16:9 ratio */
+          padding-top: 75%; /* Match the 4:3 ratio */
           position: relative;
         }
 
