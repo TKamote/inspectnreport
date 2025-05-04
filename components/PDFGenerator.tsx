@@ -9,6 +9,7 @@ import { CardData, PDFTemplate, PDFGenerationOptions } from "../types/pdfTypes";
 // Import template generators
 import { generateA4Portrait2x2 } from "./pdfTemplates/A4Portrait2x2";
 import { generateA4Portrait2x3 } from "./pdfTemplates/A4Portrait2x3";
+import { generateA4Landscape3x2 } from "./pdfTemplates/A4Landscape3x2";
 
 // Compress image and convert to base64
 const compressAndConvertToBase64 = async (uri: string): Promise<string> => {
@@ -73,6 +74,9 @@ const generateHTMLByTemplate = (options: PDFGenerationOptions): string => {
     case "A4Portrait2x3":
       console.log("Using A4Portrait2x3 template");
       return generateA4Portrait2x3(cards, headerData, includeHeader);
+    case "A4Landscape3x2":
+      console.log("Using A4Landscape3x2 template");
+      return generateA4Landscape3x2(cards, headerData, includeHeader);
     // Add cases for other templates as you implement them
     default:
       Alert.alert(
