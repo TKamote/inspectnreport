@@ -11,6 +11,8 @@ import { generateA4Portrait2x2 } from "./pdfTemplates/A4Portrait2x2";
 import { generateA4Portrait2x3 } from "./pdfTemplates/A4Portrait2x3";
 import { generateA4Landscape3x2 } from "./pdfTemplates/A4Landscape3x2";
 import { generateA4Landscape4x2 } from "./pdfTemplates/A4Landscape4x2";
+import { generateA4Landscape5x3 } from "./pdfTemplates/A4Landscape5x3";
+import { generateA4Portrait4x6 } from "./pdfTemplates/A4Portrait4x6";
 
 // Compress image and convert to base64
 const compressAndConvertToBase64 = async (uri: string): Promise<string> => {
@@ -81,6 +83,12 @@ const generateHTMLByTemplate = (options: PDFGenerationOptions): string => {
     case "A4Landscape4x2":
       console.log("Using A4Landscape4x2 template");
       return generateA4Landscape4x2(cards, headerData, includeHeader);
+    case "A4Landscape5x3":
+      console.log("Using A4Landscape5x3 template");
+      return generateA4Landscape5x3(cards, headerData, includeHeader);
+    case "A4Portrait4x6":
+      console.log("Using A4Portrait4x6 template");
+      return generateA4Portrait4x6(cards, headerData, includeHeader);
     // Add cases for other templates as you implement them
     default:
       Alert.alert(

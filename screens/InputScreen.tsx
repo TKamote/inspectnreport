@@ -47,9 +47,14 @@ export default function InputScreen({ route }: { route: any }) {
     ]);
   };
 
-  const updateCard = (index: number, field: string, value: string | null) => {
+  const updateCard = (index: number, updatedCard: any) => {
     const updatedCards = [...cards];
-    updatedCards[index][field] = value;
+    updatedCards[index] = updatedCard;
+    setCards(updatedCards);
+  };
+
+  const removeCard = (index: number) => {
+    const updatedCards = cards.filter((_, cardIndex) => cardIndex !== index);
     setCards(updatedCards);
   };
 
@@ -75,8 +80,11 @@ export default function InputScreen({ route }: { route: any }) {
                 hour: "2-digit",
                 minute: "2-digit",
               }); // Generate timestamp
-              updateCard(index, "photo", result.assets[0].uri);
-              updateCard(index, "timestamp", timestamp);
+              updateCard(index, {
+                ...cards[index],
+                photo: result.assets[0].uri,
+                timestamp: timestamp,
+              });
             }
           },
         },
@@ -97,8 +105,11 @@ export default function InputScreen({ route }: { route: any }) {
                 hour: "2-digit",
                 minute: "2-digit",
               }); // Generate timestamp
-              updateCard(index, "photo", result.assets[0].uri);
-              updateCard(index, "timestamp", timestamp);
+              updateCard(index, {
+                ...cards[index],
+                photo: result.assets[0].uri,
+                timestamp: timestamp,
+              });
             }
           },
         },
@@ -144,6 +155,8 @@ export default function InputScreen({ route }: { route: any }) {
     });
   };
 
+  const hideObservations = template === "A4Portrait4x6";
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -152,22 +165,45 @@ export default function InputScreen({ route }: { route: any }) {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Template: {template}</Text>
 
+        {template === "A4Portrait4x6" && (
+          <Text style={styles.infoText}>
+            Note: The 4x6 template shows only images and locations (no
+            observations)
+          </Text>
+        )}
+
         {/* Render Cards */}
         {cards.map((card, index) => (
-          <View key={index} style={styles.card}>
+          <View key={index} style={styles.cardContainer}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>Card {index + 1}</Text>
+              <TouchableOpacity onPress={() => removeCard(index)}>
+                <Ionicons name="close-circle" size={24} color="#FF6B6B" />
+              </TouchableOpacity>
+            </View>
+
             <TextInput
               style={styles.input}
               placeholder="Location"
               value={card.location}
-              onChangeText={(text) => updateCard(index, "location", text)}
+              onChangeText={(text) =>
+                updateCard(index, { ...card, location: text })
+              }
             />
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Observations"
-              value={card.observations}
-              onChangeText={(text) => updateCard(index, "observations", text)}
-              multiline
-            />
+
+            {/* Hide observations input for A4Portrait4x6 template */}
+            {!hideObservations && (
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Observations"
+                multiline
+                value={card.observations}
+                onChangeText={(text) =>
+                  updateCard(index, { ...card, observations: text })
+                }
+              />
+            )}
+
             <TouchableOpacity
               style={styles.photoButton}
               onPress={() => handlePhotoSelection(index)}
@@ -259,13 +295,30 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
-  card: {
+  infoText: {
+    color: "#007BFF",
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 15,
+    fontStyle: "italic",
+  },
+  cardContainer: {
     marginBottom: 20,
     padding: 15,
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
     backgroundColor: "#f9f9f9",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
   input: {
     width: "100%",

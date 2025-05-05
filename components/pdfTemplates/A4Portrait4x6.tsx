@@ -6,20 +6,13 @@ import {
   generateFooterHTML,
 } from "./commonPdfElements";
 
-// Helper function to truncate text
-function truncateText(text: string, maxLength: number = 100): string {
-  if (!text) return "No observations";
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + "...";
-}
-
-export const generateA4Landscape5x3 = (
+export const generateA4Portrait4x6 = (
   cards: CardData[],
   headerData: HeaderData,
   includeHeader: boolean
 ): string => {
-  // Define cards per page (5x3 grid = 15 cards)
-  const cardsPerPage = 15;
+  // Define cards per page (4x6 grid = 24 cards)
+  const cardsPerPage = 24;
   const pageCount = Math.ceil(cards.length / cardsPerPage);
 
   // Generate the header HTML once to reuse
@@ -61,13 +54,7 @@ export const generateA4Landscape5x3 = (
               `
             }
           </div>
-          <div class="card-observations">
-            <div class="observations-title">Observations:</div>
-            <div class="observations-content">${truncateText(
-              card.observations || "No observations",
-              100 // Very short text limit for 5-column layout
-            )}</div>
-          </div>
+          <!-- Observations deliberately removed as requested -->
         </div>
       `;
       })
@@ -111,9 +98,9 @@ export const generateA4Landscape5x3 = (
       <style>
         ${generateCommonStyles()}
         
-        /* Define A4 page size explicitly as LANDSCAPE and remove ALL margins */
+        /* Define A4 page size explicitly and remove ALL margins */
         @page {
-          size: A4 landscape;
+          size: A4 portrait;
           margin: 0;
           orphans: 0;
           widows: 0;
@@ -129,7 +116,7 @@ export const generateA4Landscape5x3 = (
         /* Make sure the body has no margins */
         body {
           font-family: 'Helvetica Neue', Arial, sans-serif;
-          font-size: 9px;
+          font-size: 8px;
           margin: 0;
           padding: 0;
           color: #333;
@@ -142,11 +129,11 @@ export const generateA4Landscape5x3 = (
           page-break-after: avoid !important;
         }
 
-        /* Page structure with landscape dimensions */
+        /* Page structure with reduced height */
         .page {
           position: relative;
-          width: 297mm;
-          height: 208mm; /* Reduced from 210mm to 208mm to prevent extra page */
+          width: 210mm;
+          height: 295mm; /* Reduced from 297mm */
           margin: 0;
           padding: 0;
           box-sizing: border-box;
@@ -168,7 +155,7 @@ export const generateA4Landscape5x3 = (
           left: 0;
           right: 0;
           width: 100%;
-          padding: 4mm 15mm;
+          padding: 3mm 10mm;
           z-index: 10;
           background-color: white;
         }
@@ -176,15 +163,15 @@ export const generateA4Landscape5x3 = (
         /* Page content positioning - adjust spacing with explicit height */
         .page-content {
           position: absolute;
-          top: 20mm; /* Moved up to allow more space for 3 rows */
-          bottom: 15mm;
+          top: 15mm; /* Reduced to fit more content */
+          bottom: 10mm;
           left: 0;
           right: 0;
           width: 95%;
-          height: 173mm; /* Increased height for 3 rows */
+          height: 270mm; /* Increased height for 6 rows */
           margin: 0 auto;
           overflow: visible;
-          padding-top: 3mm;
+          padding-top: 2mm;
         }
 
         /* Footer fixed at bottom of page */
@@ -194,7 +181,7 @@ export const generateA4Landscape5x3 = (
           left: 0;
           right: 0;
           width: 100%;
-          padding: 4mm 15mm;
+          padding: 3mm 10mm;
           text-align: center;
           background-color: white;
         }
@@ -204,13 +191,13 @@ export const generateA4Landscape5x3 = (
           display: flex;
           flex-wrap: wrap;
           justify-content: space-between;
-          margin-bottom: 3px;
+          margin-bottom: 2px;
         }
 
         /* Fix the date field visibility */
         .header-value {
-          margin-right: 12px;
-          font-size: 9px;
+          margin-right: 10px;
+          font-size: 8px;
           max-width: 180px;
           white-space: normal;
         }
@@ -219,39 +206,41 @@ export const generateA4Landscape5x3 = (
         .date-section {
           display: flex;
           align-items: center;
-          min-width: 120px;
-          max-width: 180px;
+          min-width: 100px;
+          max-width: 150px;
           margin-left: auto;
         }
 
         /* Report title - with margins and padding removed */
         .report-title {
-          font-size: 14px;
+          font-size: 12px;
           font-weight: bold;
           margin-top: 0;
           margin-bottom: 0;
           padding-top: 0;
         }
         
-        /* Header labels - reduced to 9px */
+        /* Header labels - reduced to 8px */
         .header-label {
           font-weight: bold;
-          margin-right: 4px;
-          font-size: 9px;
+          margin-right: 3px;
+          font-size: 8px;
         }
         
-        /* Ensure card headers are always visible */
+        /* Card header - fixed with black border and consistent spacing */
         .card-header {
           background-color: #007BFF;
           color: #000;
-          padding: 4px 6px;
+          padding: 4px 5px; /* Consistent padding for all rows */
           font-weight: bold;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          font-size: 8px;
+          font-size: 7px;
           z-index: 10;
           position: relative;
+          border: 1px solid #000; /* Add visible black border */
+          border-bottom: none; /* Remove bottom border as it connects to image */
         }
 
         /* Ensure all card header content is visible */
@@ -262,55 +251,25 @@ export const generateA4Landscape5x3 = (
           opacity: 1 !important;
         }
 
-        /* Fix for first row cards to ensure header visibility */
-        .grid-container > .card:nth-child(-n+5) .card-header {
-          position: relative;
-          z-index: 15;
-        }
-
-        /* Ensure second row cards are fully visible */
-        .grid-container > .card:nth-child(n+6):nth-child(-n+10) {
-          position: relative;
-          z-index: 5;
-        }
-
-        /* Ensure third row cards are fully visible */
-        .grid-container > .card:nth-child(n+11) {
-          position: relative;
-          z-index: 4;
-        }
+        /* Z-index management for multiple rows */
+        .grid-container > .card:nth-child(-n+4) .card-header { z-index: 20; } /* Row 1 */
+        .grid-container > .card:nth-child(n+5):nth-child(-n+8) { z-index: 15; } /* Row 2 */
+        .grid-container > .card:nth-child(n+9):nth-child(-n+12) { z-index: 10; } /* Row 3 */
+        .grid-container > .card:nth-child(n+13):nth-child(-n+16) { z-index: 8; } /* Row 4 */
+        .grid-container > .card:nth-child(n+17):nth-child(-n+20) { z-index: 6; } /* Row 5 */
+        .grid-container > .card:nth-child(n+21) { z-index: 4; } /* Row 6 */
         
-        /* Other elements should keep consistent proportions */
-        .observations-title {
-          font-weight: bold;
-          margin-bottom: 1px;
-          color: #333;
-          font-size: 8px;
-          display: inline-block;
-        }
-        
-        .observations-content {
-          white-space: pre-wrap;
-          font-size: 7px;
-          line-height: 1.1;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          display: -webkit-box;
-          -webkit-line-clamp: 4;
-          -webkit-box-orient: vertical;
-          color: #333;
-        }
-        
-        /* A4 Landscape 5x3 specific styles */
+        /* A4 Portrait 4x6 specific styles */
         .grid-container {
           display: grid;
-          grid-template-columns: repeat(5, 1fr); /* 5 equal columns */
-          grid-template-rows: repeat(3, auto); /* 3 auto-sized rows */
-          gap: 8px;
+          grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
+          grid-template-rows: repeat(6, auto); /* 6 auto-sized rows */
+          gap: 6px;
           margin-bottom: 2px;
           width: 100%;
           margin-left: auto;
           margin-right: auto;
+          margin-top: 6px; /* Add margin at top to pull cards away from edge */
         }
         
         /* Image container with 4:3 aspect ratio */
@@ -319,6 +278,8 @@ export const generateA4Landscape5x3 = (
           width: 100%;
           padding-top: 75%; /* 4:3 ratio = 75% */
           overflow: hidden;
+          border: 1px solid #000; /* Add visible black border */
+          border-top: none; /* Remove top border as it connects to header */
         }
 
         /* Position image absolutely within container */
@@ -336,7 +297,7 @@ export const generateA4Landscape5x3 = (
         /* Card image wrapper to hold the container */
         .card-image {
           position: relative;
-          margin-bottom: 1px;
+          margin-bottom: 0; /* No margin needed since we removed observations */
         }
 
         /* No image container - match the aspect ratio */
@@ -345,6 +306,8 @@ export const generateA4Landscape5x3 = (
           width: 100%;
           padding-top: 75%; /* Match the 4:3 ratio */
           position: relative;
+          border: 1px solid #000; /* Add visible black border */
+          border-top: none; /* Remove top border as it connects to header */
         }
 
         /* No image text - center it properly */
@@ -360,19 +323,19 @@ export const generateA4Landscape5x3 = (
           color: #888;
           font-style: italic;
           background-color: #e0e0e0;
-          font-size: 8px;
+          font-size: 7px;
         }
         
         /* Clean, minimal timestamp styling */
         .timestamp {
           position: absolute;
-          bottom: 3px;
-          right: 3px; 
+          bottom: 2px;
+          right: 2px; 
           width: auto;
           text-align: right;
           background-color: rgba(0, 0, 0, 0.5);
           color: #ddd;
-          font-size: 6px;
+          font-size: 5px;
           padding: 1px 2px;
           line-height: 1;
           z-index: 100;
@@ -392,28 +355,22 @@ export const generateA4Landscape5x3 = (
           padding: 0;
         }
         
-        /* Card styling - very small for 5x3 layout */
+        /* Card styling - streamlined for 4x6 layout */
         .card {
           page-break-inside: avoid;
           display: flex;
           flex-direction: column;
           position: relative;
-          margin-bottom: 2px;
-          max-height: 55mm; /* Very small for 5x3 layout */
-          border: none;
+          margin-bottom: 1px;
+          max-height: 42mm; /* Sized for 4x6 layout */
+          border: none; /* No overall border, we're adding borders to components */
+          /* Add outer borders to make sure cards are fully visible */
+          box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
         }
         
         /* Add this to the last page */
         .page:last-of-type {
           page-break-after: avoid;
-        }
-        
-        /* Observations styling - very small for 5x3 layout */
-        .card-observations {
-          padding: 4px 6px 3px;
-          max-height: 45px; /* Very small for 5x3 layout */
-          overflow: hidden;
-          background-color: #f9f9f9;
         }
 
         /* Force proper page breaks in PDF output */
