@@ -154,8 +154,6 @@ export const generateA4Landscape3x2 = (
           overflow: hidden;
           page-break-after: avoid;
           page-break-inside: avoid;
-          /* Remove the dotted border */
-          /* border: 1px dashed #ccc; */
         }
 
         /* Fix for the last page specifically */
@@ -172,10 +170,6 @@ export const generateA4Landscape3x2 = (
           right: 0;
           width: 100%;
           padding: 5mm 15mm;
-          /* Comment out the border */
-          /* border-bottom: 1px dotted #eee; */
-          z-index: 10;
-          background-color: white; /* Ensure visibility */
         }
 
         /* Page content positioning - adjust spacing with explicit height */
@@ -411,6 +405,7 @@ export const generateA4Landscape3x2 = (
           position: relative;
           margin-bottom: 8px; /* Reduce from 10px to 8px */
           max-height: 80mm; /* Reduced from 90mm for landscape layout */
+          border: 1px solid #ccc; /* Add outer border to entire card */
         }
         
         /* Add this to the last page */

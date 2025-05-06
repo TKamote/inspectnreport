@@ -175,13 +175,6 @@ export default function InputScreen({ route }: { route: any }) {
         {/* Render Cards */}
         {cards.map((card, index) => (
           <View key={index} style={styles.cardContainer}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>Card {index + 1}</Text>
-              <TouchableOpacity onPress={() => removeCard(index)}>
-                <Ionicons name="close-circle" size={24} color="#FF6B6B" />
-              </TouchableOpacity>
-            </View>
-
             <TextInput
               style={styles.input}
               placeholder="Location"
@@ -226,6 +219,17 @@ export default function InputScreen({ route }: { route: any }) {
                 <Text style={styles.imagePlaceholderText}>Image Preview</Text>
               </View>
             )}
+
+            {/* Add new card footer here */}
+            <View style={styles.cardFooter}>
+              <Text style={styles.cardNumber}>#{index + 1}</Text>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => removeCard(index)}
+              >
+                <Ionicons name="trash-outline" size={18} color="#999" />
+              </TouchableOpacity>
+            </View>
           </View>
         ))}
 
@@ -310,16 +314,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: "#f9f9f9",
   },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
   input: {
     width: "100%",
     height: 40,
@@ -389,6 +383,23 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     alignSelf: "center",
+  },
+  cardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 15,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  cardNumber: {
+    fontSize: 14,
+    color: "#999",
+    fontWeight: "500",
+  },
+  deleteButton: {
+    padding: 5,
   },
   addButton: {
     flexDirection: "row",

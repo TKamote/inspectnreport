@@ -29,12 +29,11 @@ export const generateA4Landscape4x2 = (
 
   // Generate HTML for all pages with page breaks
   let pagesHTML = "";
-
-  for (let page = 0; pageCount; page++) {
-    // Get the cards for this page
-    const startIndex = page * cardsPerPage;
-    const pageCards = cards.slice(startIndex, startIndex + cardsPerPage);
-
+    for (let page = 0; pageCount > page; page++) {
+      // Get the cards for this page
+      const startIndex = page * cardsPerPage;
+      const pageCards = cards.slice(startIndex, startIndex + cardsPerPage);
+    
     // Generate HTML for each card
     const pageCardItems = pageCards
       .map((card, index) => {
@@ -171,14 +170,12 @@ export const generateA4Landscape4x2 = (
           right: 0;
           width: 100%;
           padding: 5mm 15mm;
-          z-index: 10;
-          background-color: white;
         }
 
         /* Page content positioning - adjust spacing with explicit height */
         .page-content {
           position: absolute;
-          top: 22mm; /* Reduced from 25mm to move content up */
+          top: 26mm; /* add from 22mm to move content down */
           bottom: 15mm;
           left: 0;
           right: 0;
@@ -407,7 +404,7 @@ export const generateA4Landscape4x2 = (
           position: relative;
           margin-bottom: 5px;
           max-height: 70mm; /* Increased from 65mm to use more vertical space */
-          border: none;
+          border: 1px solid #ccc; /* Add outer border to entire card */
         }
         
         /* Add this to the last page */

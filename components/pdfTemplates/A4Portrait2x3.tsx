@@ -176,10 +176,6 @@ export const generateA4Portrait2x3 = (
           right: 0;
           width: 100%;
           padding: 5mm 15mm;
-          /* Comment out the border */
-          /* border-bottom: 1px dotted #eee; */
-          z-index: 10;
-          background-color: white; /* Ensure visibility */
         }
 
         /* Page content positioning - adjust spacing with explicit height */

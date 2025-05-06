@@ -31,7 +31,7 @@ export const generateA4Portrait2x2 = (
   let pagesHTML = "";
 
   // Loop through pages with proper termination condition
-  for (let page = 0; pageCount > page; page++) {
+  for (let page = 0; page < pageCount; page++) {
     const startIndex = page * cardsPerPage;
     const pageCards = cards.slice(startIndex, startIndex + cardsPerPage);
 
@@ -122,6 +122,7 @@ export const generateA4Portrait2x2 = (
           margin: 0;
           orphans: 0;
           widows: 0;
+         
         }
 
         /* Reset all browser default margins and padding */
@@ -138,6 +139,7 @@ export const generateA4Portrait2x2 = (
           margin: 0;
           padding: 0;
           color: #333;
+          
         }
 
         /* Container should also have no margins */
@@ -145,6 +147,7 @@ export const generateA4Portrait2x2 = (
           margin: 0;
           padding: 0;
           page-break-after: avoid !important;
+           background-color: yellow;
         }
 
         /* Page structure with reduced height */
@@ -160,6 +163,7 @@ export const generateA4Portrait2x2 = (
           page-break-inside: avoid;
           /* Comment out the border */
           border: 1px dashed #ccc;
+          
         }
 
         /* Fix for the last page specifically */
@@ -176,10 +180,6 @@ export const generateA4Portrait2x2 = (
           right: 0;
           width: 100%;
           padding: 5mm 15mm;
-          /* Comment out the border */
-          /* border-bottom: 1px dotted #eee; */
-          z-index: 10;
-          background-color: white; /* Ensure visibility */
         }
 
         /* Page content positioning - adjust spacing with explicit height */
@@ -216,6 +216,7 @@ export const generateA4Portrait2x2 = (
           flex-wrap: wrap;
           justify-content: space-between;
           margin-bottom: 5px;
+          
         }
 
         /* Fix the date field visibility */
@@ -262,22 +263,14 @@ export const generateA4Portrait2x2 = (
           align-items: center;
           font-size: 10px;
           z-index: 10;
-          position: relative;
+          // position: relative;
         }
 
-        /* Ensure all card header content is visible */
+        /* Ensure all card header content is visible 
         .card-location, .card-number {
           display: inline-block; 
           position: relative; /* Add position to ensure stacking context */
-          z-index: 2; /* Add z-index to ensure visibility */
-          opacity: 1 !important; /* Force visibility */
-        }
-
-        /* Fix for first two cards to ensure header visibility */
-        .grid-container > .card:nth-child(-n+2) .card-header {
-          position: relative;
-          z-index: 15; /* Higher z-index for first two cards */
-        }
+        }*/
         
         /* Other elements should keep consistent proportions */
         .observations-title {
@@ -309,6 +302,7 @@ export const generateA4Portrait2x2 = (
           width: 82%; 
           margin-left: auto;
           margin-right: auto;
+          
         }
         
         /* Special styling for a single row (1-2 cards) */
@@ -323,7 +317,6 @@ export const generateA4Portrait2x2 = (
           padding-top: 133.33%; /* 3:4 ratio = 133.33% */
           overflow: hidden;
         }
-
         /* Position image absolutely within container */
         .image-container img {
           position: absolute;
@@ -401,7 +394,7 @@ export const generateA4Portrait2x2 = (
           flex-direction: column;
           position: relative;
           margin-bottom: 8px; /* Reduce from 10px to 8px */
-          max-height: 120mm; /* Set explicit maximum height for each card */
+          max-height: 120mm; /* Set explicit maximum height for each card */ 
         }
         
         /* Add this to the last page */

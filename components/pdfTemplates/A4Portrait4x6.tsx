@@ -15,9 +15,9 @@ export const generateA4Portrait4x6 = (
   const cardsPerPage = 24;
   const pageCount = Math.ceil(cards.length / cardsPerPage);
 
-  // Generate the header HTML once to reuse
+  // Modify how the header is included
   const headerHTML = includeHeader
-    ? generateHeaderHTML(headerData)
+    ? `<div class="standard-header">${generateHeaderHTML(headerData)}</div>`
     : '<div class="minimal-header"><div class="report-title">Inspection Report</div></div>';
 
   // Generate HTML for all pages with page breaks
@@ -133,13 +133,14 @@ export const generateA4Portrait4x6 = (
         .page {
           position: relative;
           width: 210mm;
-          height: 295mm; /* Reduced from 297mm */
+          height: 295mm;
           margin: 0;
           padding: 0;
           box-sizing: border-box;
           overflow: hidden;
           page-break-after: avoid;
           page-break-inside: avoid;
+          z-index: 1; /* Set base z-index */
         }
 
         /* Fix for the last page specifically */
@@ -155,26 +156,34 @@ export const generateA4Portrait4x6 = (
           left: 0;
           right: 0;
           width: 100%;
-          padding: 3mm 10mm;
-          z-index: 10;
-          background-color: white;
+          padding: 3mm 10mm 5mm;
+          z-index: 20;
+thn          overflow: hidden; /* Prevent potential header overflow */
         }
 
-        /* Page content positioning - adjust spacing with explicit height */
+        /* Safe header styling to prevent PDF generation issues */
+        .standard-header {
+          max-width: 100%;
+          max-height: 20mm;
+          overflow: hidden;
+        }
+
+        /* Ensure better spacing when header is present */
         .page-content {
           position: absolute;
-          top: 15mm; /* Reduced to fit more content */
-          bottom: 10mm;
+          top: 26mm; /* Increased from 22mm to handle header better */
+          bottom: 12mm;
           left: 0;
           right: 0;
           width: 95%;
-          height: 270mm; /* Increased height for 6 rows */
+          height: 257mm; /* Adjusted for increased top spacing */
           margin: 0 auto;
           overflow: visible;
-          padding-top: 2mm;
+          padding-top: 3mm;
+          box-sizing: border-box;
         }
 
-        /* Footer fixed at bottom of page */
+        /* Footer with reduced padding */
         .page-footer {
           position: absolute;
           bottom: 0;
@@ -183,7 +192,7 @@ export const generateA4Portrait4x6 = (
           width: 100%;
           padding: 3mm 10mm;
           text-align: center;
-          background-color: white;
+          z-index: 20;
         }
 
         /* Improved header layout */
@@ -231,55 +240,76 @@ export const generateA4Portrait4x6 = (
         .card-header {
           background-color: #007BFF;
           color: #000;
-          padding: 4px 5px; /* Consistent padding for all rows */
+          padding: 4px 5px;
           font-weight: bold;
           display: flex;
           justify-content: space-between;
           align-items: center;
           font-size: 7px;
-          z-index: 10;
           position: relative;
-          border: 1px solid #000; /* Add visible black border */
-          border-bottom: none; /* Remove bottom border as it connects to image */
+          border: 1.5px solid #000 !important; /* Thicker black border with !important */
+          border-bottom: none !important;
+          margin: 0; /* Ensure no margin */
+          z-index: 5 !important; /* Force higher z-index with !important */
         }
 
-        /* Ensure all card header content is visible */
+        /* Make sure location and number text are always visible */
         .card-location, .card-number {
-          display: inline-block; 
-          position: relative;
-          z-index: 2;
+          color: #000 !important;
           opacity: 1 !important;
+          font-weight: bold !important;
+          text-shadow: 0 0 1px white; /* Add text shadow for better visibility */
         }
 
-        /* Z-index management for multiple rows */
-        .grid-container > .card:nth-child(-n+4) .card-header { z-index: 20; } /* Row 1 */
-        .grid-container > .card:nth-child(n+5):nth-child(-n+8) { z-index: 15; } /* Row 2 */
-        .grid-container > .card:nth-child(n+9):nth-child(-n+12) { z-index: 10; } /* Row 3 */
-        .grid-container > .card:nth-child(n+13):nth-child(-n+16) { z-index: 8; } /* Row 4 */
-        .grid-container > .card:nth-child(n+17):nth-child(-n+20) { z-index: 6; } /* Row 5 */
-        .grid-container > .card:nth-child(n+21) { z-index: 4; } /* Row 6 */
-        
-        /* A4 Portrait 4x6 specific styles */
+        /* Override z-index for all rows to have the same behavior */
+        .grid-container > .card:nth-child(-n+4) .card-header {
+          z-index: 10 !important; /* Even higher z-index for first row */
+          position: relative !important;
+          top: 0 !important;
+        }
+
+        .grid-container > .card:nth-child(n+5):nth-child(-n+8) .card-header,
+        .grid-container > .card:nth-child(n+9):nth-child(-n+12) .card-header,
+        .grid-container > .card:nth-child(n+13):nth-child(-n+16) .card-header,
+        .grid-container > .card:nth-child(n+17):nth-child(-n+20) .card-header,
+        .grid-container > .card:nth-child(n+21) .card-header {
+          z-index: 2;
+        }
+
+        /* Remove all the card z-index rules that were causing uneven spacing */
+        .grid-container > .card:nth-child(-n+4),
+        .grid-container > .card:nth-child(n+5):nth-child(-n+8),
+        .grid-container > .card:nth-child(n+9):nth-child(-n+12),
+        .grid-container > .card:nth-child(n+13):nth-child(-n+16),
+        .grid-container > .card:nth-child(n+17):nth-child(-n+20),
+        .grid-container > .card:nth-child(n+21) {
+          z-index: 1;
+          position: relative;
+        }
+
+        /* Grid container with width reduced to 95% */
         .grid-container {
           display: grid;
-          grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
-          grid-template-rows: repeat(6, auto); /* 6 auto-sized rows */
-          gap: 6px;
-          margin-bottom: 2px;
-          width: 100%;
+          grid-template-columns: repeat(4, 1fr);
+          grid-template-rows: repeat(6, auto);
+          gap: 8px;
+          margin: 0;
+          width: 95%; /* Reduced from 100% to 95% to add horizontal margins */
           margin-left: auto;
           margin-right: auto;
-          margin-top: 6px; /* Add margin at top to pull cards away from edge */
+          margin-top: 0;
+          padding-top: 0;
         }
         
-        /* Image container with 4:3 aspect ratio */
-        .image-container {
+        /* Image container with slightly reduced height */
+        .image-container, .no-image {
           position: relative;
           width: 100%;
-          padding-top: 75%; /* 4:3 ratio = 75% */
+          padding-top: 72%; /* Reduced from 75% to prevent cutoff */
           overflow: hidden;
-          border: 1px solid #000; /* Add visible black border */
-          border-top: none; /* Remove top border as it connects to header */
+          border: 1.5px solid #000 !important;
+          border-top: none !important;
+          margin-top: 0;
         }
 
         /* Position image absolutely within container */
@@ -297,17 +327,16 @@ export const generateA4Portrait4x6 = (
         /* Card image wrapper to hold the container */
         .card-image {
           position: relative;
-          margin-bottom: 0; /* No margin needed since we removed observations */
+          margin: 0; /* Remove all margins */
+          padding: 0; /* Remove all padding */
         }
 
         /* No image container - match the aspect ratio */
         .no-image {
           display: flex;
           width: 100%;
-          padding-top: 75%; /* Match the 4:3 ratio */
           position: relative;
-          border: 1px solid #000; /* Add visible black border */
-          border-top: none; /* Remove top border as it connects to header */
+          margin-top: 0; /* Ensure no gap */
         }
 
         /* No image text - center it properly */
@@ -355,17 +384,17 @@ export const generateA4Portrait4x6 = (
           padding: 0;
         }
         
-        /* Card styling - streamlined for 4x6 layout */
+        /* Card styling with reduced max-height */
         .card {
           page-break-inside: avoid;
           display: flex;
           flex-direction: column;
           position: relative;
-          margin-bottom: 1px;
-          max-height: 42mm; /* Sized for 4x6 layout */
-          border: none; /* No overall border, we're adding borders to components */
-          /* Add outer borders to make sure cards are fully visible */
-          box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
+          margin: 0;
+          padding: 0;
+          max-height: 40mm; /* Reduced from 42mm to help with vertical fit */
+          border: none;
+          box-shadow: none;
         }
         
         /* Add this to the last page */
