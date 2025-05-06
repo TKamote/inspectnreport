@@ -20,7 +20,7 @@ export const generateA4Landscape3x2 = (
 ): string => {
   // Define cards per page (3x2 grid = 6 cards)
   const cardsPerPage = 6;
-  const pageCount = Math.ceil(cards.length / cardsPerPage);
+  const pageCount = Math.max(1, Math.ceil(cards.length / cardsPerPage));
 
   // Generate the header HTML once to reuse
   const headerHTML = includeHeader
@@ -30,7 +30,7 @@ export const generateA4Landscape3x2 = (
   // Generate HTML for all pages with page breaks
   let pagesHTML = "";
 
-  for (let page = 0; pageCount > page; page++) {
+  for (let page = 0; page < pageCount; page++) {
     // Get the cards for this page
     const startIndex = page * cardsPerPage;
     const pageCards = cards.slice(startIndex, startIndex + cardsPerPage);
@@ -175,7 +175,7 @@ export const generateA4Landscape3x2 = (
         /* Page content positioning - adjust spacing with explicit height */
         .page-content {
           position: absolute;
-          top: 25mm;
+          top: 30mm;
           bottom: 20mm;
           left: 0;
           right: 0;

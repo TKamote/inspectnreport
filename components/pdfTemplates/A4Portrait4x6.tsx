@@ -140,7 +140,7 @@ export const generateA4Portrait4x6 = (
           overflow: hidden;
           page-break-after: avoid;
           page-break-inside: avoid;
-          z-index: 1; /* Set base z-index */
+          /* z-index: 1;  Set base z-index */
         }
 
         /* Fix for the last page specifically */
@@ -157,8 +157,7 @@ export const generateA4Portrait4x6 = (
           right: 0;
           width: 100%;
           padding: 3mm 10mm 5mm;
-          z-index: 20;
-thn          overflow: hidden; /* Prevent potential header overflow */
+         overflow: hidden; /* Prevent potential header overflow */
         }
 
         /* Safe header styling to prevent PDF generation issues */
@@ -171,11 +170,11 @@ thn          overflow: hidden; /* Prevent potential header overflow */
         /* Ensure better spacing when header is present */
         .page-content {
           position: absolute;
-          top: 26mm; /* Increased from 22mm to handle header better */
+          top: 28mm; /* Increased from 22mm to handle header better */
           bottom: 12mm;
           left: 0;
           right: 0;
-          width: 95%;
+          width: 96%;
           height: 257mm; /* Adjusted for increased top spacing */
           margin: 0 auto;
           overflow: visible;
@@ -247,8 +246,6 @@ thn          overflow: hidden; /* Prevent potential header overflow */
           align-items: center;
           font-size: 7px;
           position: relative;
-          border: 1.5px solid #000 !important; /* Thicker black border with !important */
-          border-bottom: none !important;
           margin: 0; /* Ensure no margin */
           z-index: 5 !important; /* Force higher z-index with !important */
         }
@@ -287,6 +284,13 @@ thn          overflow: hidden; /* Prevent potential header overflow */
           position: relative;
         }
 
+        /* Target the second column cards specifically (cards 2, 6, 10, 14, 18, 22) */
+        .grid-container > .card:nth-child(4n+2) {
+          position: relative;
+          z-index: 3; /* Ensure these cards are above background */
+          border-right: .5px solid #000 !important; /* Reinforce right border */
+        }
+
         /* Grid container with width reduced to 95% */
         .grid-container {
           display: grid;
@@ -294,7 +298,7 @@ thn          overflow: hidden; /* Prevent potential header overflow */
           grid-template-rows: repeat(6, auto);
           gap: 8px;
           margin: 0;
-          width: 95%; /* Reduced from 100% to 95% to add horizontal margins */
+          width: 96%; /* Reduced from 100% to 95% to add horizontal margins */
           margin-left: auto;
           margin-right: auto;
           margin-top: 0;
@@ -307,8 +311,6 @@ thn          overflow: hidden; /* Prevent potential header overflow */
           width: 100%;
           padding-top: 72%; /* Reduced from 75% to prevent cutoff */
           overflow: hidden;
-          border: 1.5px solid #000 !important;
-          border-top: none !important;
           margin-top: 0;
         }
 
@@ -393,8 +395,9 @@ thn          overflow: hidden; /* Prevent potential header overflow */
           margin: 0;
           padding: 0;
           max-height: 40mm; /* Reduced from 42mm to help with vertical fit */
-          border: none;
+          border: .5px solid #000 !important; /* Thicker black border with !important */
           box-shadow: none;
+          box-sizing: border-box; /* Add this to ensure border is included in width calculations */
         }
         
         /* Add this to the last page */

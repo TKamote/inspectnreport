@@ -158,8 +158,6 @@ export const generateA4Portrait2x3 = (
           overflow: hidden;
           page-break-after: avoid;
           page-break-inside: avoid;
-          /* Comment out the border */
-          border: 1px dashed #ccc;
         }
 
         /* Fix for the last page specifically */
@@ -181,12 +179,12 @@ export const generateA4Portrait2x3 = (
         /* Page content positioning - adjust spacing with explicit height */
         .page-content {
           position: absolute;
-          top: 25mm;
+          top: 30mm;
           bottom: 20mm;
           left: 0;
           right: 0;
-          width: 90%;
-          height: 252mm; /* Explicitly set height to control content area */
+          width: 91%;
+          height: 260mm; /* Explicitly set height to control content area */
           margin: 0 auto;
           overflow: hidden; /* Keep this to prevent content spilling */
           padding-top: 5mm;
@@ -201,9 +199,6 @@ export const generateA4Portrait2x3 = (
           width: 100%;
           padding: 5mm 15mm;
           text-align: center;
-          /* Comment out the border */
-          /* border-top: 1px dotted #eee; */
-          background-color: white; /* Ensure visibility */
         }
 
         /* Improved header layout */
@@ -257,8 +252,6 @@ export const generateA4Portrait2x3 = (
           justify-content: space-between;
           align-items: center;
           font-size: 10px;
-          z-index: 10;
-          position: relative;
         }
 
         /* Ensure all card header content is visible */
@@ -303,7 +296,7 @@ export const generateA4Portrait2x3 = (
           grid-template-rows: 1fr 1fr 1fr; /* 3 rows */
           gap: 15px 50px;
           margin-bottom: 2px;
-          width: 82%; 
+          width: 83%; 
           margin-left: auto;
           margin-right: auto;
         }

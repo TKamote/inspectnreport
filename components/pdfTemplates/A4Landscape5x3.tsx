@@ -24,7 +24,7 @@ export const generateA4Landscape5x3 = (
 
   // Generate the header HTML once to reuse
   const headerHTML = includeHeader
-    ? generateHeaderHTML(headerData)
+    ? `<div class="standard-header">${generateHeaderHTML(headerData)}</div>`
     : '<div class="minimal-header"><div class="report-title">Inspection Report</div></div>';
 
   // Generate HTML for all pages with page breaks
@@ -169,8 +169,6 @@ export const generateA4Landscape5x3 = (
           right: 0;
           width: 100%;
           padding: 4mm 15mm;
-          z-index: 10;
-          background-color: white;
         }
 
         /* Page content positioning - adjust spacing with explicit height */
@@ -250,8 +248,6 @@ export const generateA4Landscape5x3 = (
           justify-content: space-between;
           align-items: center;
           font-size: 8px;
-          z-index: 10;
-          position: relative;
         }
 
         /* Ensure all card header content is visible */
@@ -400,7 +396,8 @@ export const generateA4Landscape5x3 = (
           position: relative;
           margin-bottom: 2px;
           max-height: 55mm; /* Very small for 5x3 layout */
-          border: none;
+          border: 1px solid #ddd;
+          border-radius: 3px;
         }
         
         /* Add this to the last page */
@@ -420,6 +417,13 @@ export const generateA4Landscape5x3 = (
         html, body {
           height: auto !important;
           overflow: visible !important;
+        }
+
+        /* Safe header styling to prevent PDF generation issues */
+        .standard-header {
+          max-width: 100%;
+          max-height: 18mm;
+          overflow: hidden;
         }
       </style>
     </head>
