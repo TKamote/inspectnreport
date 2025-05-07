@@ -175,11 +175,11 @@ export const generateA4Landscape4x2 = (
         /* Page content positioning - adjust spacing with explicit height */
         .page-content {
           position: absolute;
-          top: 26mm; /* add from 22mm to move content down */
+          top: 33mm; /* add from 22mm to move content down */
           bottom: 15mm;
           left: 0;
           right: 0;
-          width: 90%;
+          width: 91%;
           height: 171mm; /* Increased from 168mm to use more vertical space */
           margin: 0 auto;
           overflow: visible;
@@ -305,7 +305,7 @@ export const generateA4Landscape4x2 = (
           display: grid;
           grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
           grid-template-rows: repeat(2, auto); /* 2 auto-sized rows */
-          gap: 15px 10px; /* Increased vertical gap to 15px */
+          gap: 25px 10px; /* Increased vertical gap to 15px */
           margin-bottom: 2px;
           width: 100%; /* Keeping this at 100% as requested */
           margin-left: auto;

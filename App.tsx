@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,8 +8,10 @@ import {
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import InputScreen from "./screens/InputScreen"; // Import the InputScreen
-import * as Linking from "expo-linking"; // Import Linking to open the PDF
+import InputScreen from "./screens/InputScreen";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+import { Asset } from "expo-asset";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +27,49 @@ export default function App() {
 }
 
 const HomeScreen = ({ navigation }: { navigation: any }) => {
+  const [pdfUri, setPdfUri] = useState<string | null>(null);
+
+  // Load the PDF asset when component mounts
+  useEffect(() => {
+    async function preparePdf() {
+      try {
+        // Create a destination path in the document directory
+        const destPath = FileSystem.documentDirectory + "SamplePDFdownload.pdf";
+
+        // Check if the file already exists
+        const fileInfo = await FileSystem.getInfoAsync(destPath);
+
+        if (!fileInfo.exists) {
+          // Load the asset
+          const asset = Asset.fromModule(
+            require("./assets/SamplePDFdownload.pdf")
+          );
+          await asset.downloadAsync();
+
+          // Copy to a location that can be shared
+          if (asset.localUri) {
+            await FileSystem.copyAsync({
+              from: asset.localUri,
+              to: destPath,
+            });
+          }
+        }
+
+        // Set the final URI
+        setPdfUri(destPath);
+        console.log("PDF ready at:", destPath);
+      } catch (error) {
+        console.error("Failed to prepare PDF:", error);
+        alert(
+          "Failed to prepare PDF: " +
+            (error instanceof Error ? error.message : String(error))
+        );
+      }
+    }
+
+    preparePdf();
+  }, []);
+
   const templates = [
     { id: "1", name: "A4 Portrait (2x2)", value: "A4Portrait2x2" },
     { id: "2", name: "A4 Portrait (2x3)", value: "A4Portrait2x3" },
@@ -34,9 +79,32 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
     { id: "6", name: "A4 Portrait (4x6)", value: "A4Portrait4x6" },
   ];
 
-  const openSamplePDF = () => {
-    const pdfUrl = "https://example.com/sample-templates.pdf"; // Replace with your actual PDF URL
-    Linking.openURL(pdfUrl); // Open the PDF in the default browser
+  const openSamplePDF = async () => {
+    if (pdfUri) {
+      try {
+        // Check if sharing is available
+        const isAvailable = await Sharing.isAvailableAsync();
+
+        if (isAvailable) {
+          // This will present a native share sheet, which includes "Open with..." option
+          await Sharing.shareAsync(pdfUri, {
+            mimeType: "application/pdf",
+            dialogTitle: "View Sample PDF",
+            UTI: "com.adobe.pdf", // For iOS
+          });
+        } else {
+          alert("Sharing is not available on this device");
+        }
+      } catch (error) {
+        console.error("Error opening PDF:", error);
+        alert(
+          "Error opening PDF file: " +
+            (error instanceof Error ? error.message : String(error))
+        );
+      }
+    } else {
+      alert("PDF is still loading or failed to load. Please try again.");
+    }
   };
 
   return (
@@ -58,8 +126,14 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
       />
 
       {/* Sample PDF Button */}
-      <TouchableOpacity style={styles.sampleButton} onPress={openSamplePDF}>
-        <Text style={styles.sampleButtonText}>View Sample PDFs</Text>
+      <TouchableOpacity
+        style={[styles.sampleButton, !pdfUri && styles.disabledButton]}
+        onPress={openSamplePDF}
+        disabled={!pdfUri}
+      >
+        <Text style={styles.sampleButtonText}>
+          {pdfUri ? "View Sample PDFs" : "Loading Sample PDFs..."}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -97,6 +171,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     width: "100%",
+  },
+  disabledButton: {
+    backgroundColor: "#cccccc",
   },
   sampleButtonText: {
     color: "#fff",
