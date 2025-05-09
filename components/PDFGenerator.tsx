@@ -1,4 +1,4 @@
-import { Platform, Alert } from "react-native";
+import { Platform } from "react-native";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
@@ -14,13 +14,30 @@ import { generateA4Landscape4x2 } from "./pdfTemplates/A4Landscape4x2";
 import { generateA4Landscape5x3 } from "./pdfTemplates/A4Landscape5x3";
 import { generateA4Portrait4x6 } from "./pdfTemplates/A4Portrait4x6";
 
+// Define progress types
+export type ProgressStep =
+  | "init"
+  | "compressing"
+  | "generating"
+  | "creating"
+  | "sharing"
+  | "complete";
+
+export type ProgressInfo = {
+  step: ProgressStep;
+  message: string;
+  progress?: number; // 0-100 percentage for steps that can show progress
+  total?: number; // Total items (e.g., total images)
+  current?: number; // Current item being processed
+};
+
 // Compress image and convert to base64
 const compressAndConvertToBase64 = async (uri: string): Promise<string> => {
   try {
     // First compress the image
     const compressedImage = await ImageManipulator.manipulateAsync(
       uri,
-      [{ resize: { width: 600 } }], // Resize to max width of 600px (height auto-adjusted)
+      [{ resize: { width: 600 } }], // Resize to max width of 600px
       { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG } // 60% quality JPEG
     );
 
@@ -38,17 +55,26 @@ const compressAndConvertToBase64 = async (uri: string): Promise<string> => {
 
 // Process cards to convert image URIs to compressed base64
 const processCardsWithCompressedImages = async (
-  cards: CardData[]
+  cards: CardData[],
+  onProgress?: (info: ProgressInfo) => void
 ): Promise<CardData[]> => {
   const processedCards = [...cards];
+  const totalImages = processedCards.filter((card) => card.photo).length;
+  let processedCount = 0;
 
   for (let i = 0; i < processedCards.length; i++) {
     if (processedCards[i].photo) {
       try {
-        // Show progress in the console
-        console.log(
-          `Compressing image ${i + 1} of ${processedCards.length}...`
-        );
+        // Update progress
+        if (onProgress) {
+          onProgress({
+            step: "compressing",
+            message: `Processing image ${processedCount + 1} of ${totalImages}`,
+            progress: Math.round((processedCount / totalImages) * 100),
+            total: totalImages,
+            current: processedCount + 1,
+          });
+        }
 
         const compressedBase64Image = await compressAndConvertToBase64(
           processedCards[i].photo!
@@ -57,6 +83,8 @@ const processCardsWithCompressedImages = async (
           ...processedCards[i],
           photo: compressedBase64Image,
         };
+
+        processedCount++;
       } catch (error) {
         console.error(`Error processing image for card ${i}:`, error);
       }
@@ -72,60 +100,66 @@ const generateHTMLByTemplate = (options: PDFGenerationOptions): string => {
 
   switch (template) {
     case "A4Portrait2x2":
-      console.log("Using A4Portrait2x2 template");
       return generateA4Portrait2x2(cards, headerData, includeHeader);
     case "A4Portrait2x3":
-      console.log("Using A4Portrait2x3 template");
       return generateA4Portrait2x3(cards, headerData, includeHeader);
     case "A4Landscape3x2":
-      console.log("Using A4Landscape3x2 template");
       return generateA4Landscape3x2(cards, headerData, includeHeader);
     case "A4Landscape4x2":
-      console.log("Using A4Landscape4x2 template");
       return generateA4Landscape4x2(cards, headerData, includeHeader);
     case "A4Landscape5x3":
-      console.log("Using A4Landscape5x3 template");
       return generateA4Landscape5x3(cards, headerData, includeHeader);
     case "A4Portrait4x6":
-      console.log("Using A4Portrait4x6 template");
       return generateA4Portrait4x6(cards, headerData, includeHeader);
-    // Add cases for other templates as you implement them
     default:
-      Alert.alert(
-        "Template Warning",
-        `Unknown template: ${template}, using default template`
-      );
       console.warn(`Unknown template: ${template}, falling back to default`);
       return generateA4Portrait2x2(cards, headerData, includeHeader);
   }
 };
 
-// Main function to generate and share PDF
+// Main function to generate and share PDF with progress updates
 export const generatePDF = async (
-  options: PDFGenerationOptions
-): Promise<void> => {
+  options: PDFGenerationOptions,
+  onProgress?: (info: ProgressInfo) => void
+): Promise<boolean> => {
   try {
-    // Show an initial alert
-    Alert.alert("Generating PDF", "Step 1: Starting PDF generation process...");
+    // Start generation process
+    if (onProgress) {
+      onProgress({
+        step: "init",
+        message: "Starting PDF generation process...",
+      });
+    }
 
     console.log("PDF generation started", options.template);
     console.log("Cards count:", options.cards.length);
 
     // Process cards to convert and compress image URIs to base64
-    console.log("Starting image compression...");
-    Alert.alert(
-      "Generating PDF",
-      "Step 2: Processing images (this may take a while)..."
-    );
+    if (onProgress) {
+      onProgress({
+        step: "compressing",
+        message: "Processing images...",
+        progress: 0,
+        total: options.cards.filter((card) => card.photo).length,
+        current: 0,
+      });
+    }
 
     const processedCards = await processCardsWithCompressedImages(
-      options.cards
+      options.cards,
+      onProgress
     );
 
     console.log("Images processed successfully:", processedCards.length);
-    Alert.alert("Generating PDF", "Step 3: Generating HTML content...");
 
-    // Generate HTML content based on template
+    // Generate HTML content
+    if (onProgress) {
+      onProgress({
+        step: "generating",
+        message: "Generating PDF content...",
+      });
+    }
+
     console.log("Generating HTML with template:", options.template);
     const htmlContent = generateHTMLByTemplate({
       ...options,
@@ -133,18 +167,24 @@ export const generatePDF = async (
     });
 
     console.log("HTML generated, length:", htmlContent.length);
-    Alert.alert("Generating PDF", "Step 4: Creating PDF file...");
+
+    // Create PDF file
+    if (onProgress) {
+      onProgress({
+        step: "creating",
+        message: "Creating PDF file...",
+      });
+    }
 
     // Determine PDF dimensions based on template
     const isLandscape = options.template.includes("Landscape");
     const dimensions = isLandscape
-      ? { width: 841.89, height: 595.28 }
-      : { width: 595.28, height: 841.89 };
+      ? { width: 841.89, height: 595.28 } // A4 landscape
+      : { width: 595.28, height: 841.89 }; // A4 portrait
 
     console.log("Using dimensions:", dimensions);
 
     // Generate the PDF file
-    console.log("Calling Print.printToFileAsync...");
     const { uri } = await Print.printToFileAsync({
       html: htmlContent,
       base64: false,
@@ -152,7 +192,14 @@ export const generatePDF = async (
     });
 
     console.log("PDF created successfully at:", uri);
-    Alert.alert("Generating PDF", "Step 5: Preparing to share PDF...");
+
+    // Prepare for sharing
+    if (onProgress) {
+      onProgress({
+        step: "sharing",
+        message: "Preparing to share PDF...",
+      });
+    }
 
     // Handle PDF sharing based on platform
     const fileName = `report_${new Date().toISOString().split("T")[0]}.pdf`;
@@ -177,25 +224,40 @@ export const generatePDF = async (
       });
     }
 
-    // Show success alert
-    Alert.alert("PDF Generated", "Your PDF has been generated successfully!", [
-      { text: "OK" },
-    ]);
+    // Complete generation process
+    if (onProgress) {
+      onProgress({
+        step: "complete",
+        message: "PDF generated successfully!",
+      });
+    }
+
+    return true;
   } catch (error) {
     console.error("PDF Generation Error:", error);
-    Alert.alert(
-      "Error",
-      "Failed to generate PDF: " +
-        (error instanceof Error ? error.message : "Unknown error"),
-      [{ text: "OK" }]
-    );
+    if (onProgress) {
+      onProgress({
+        step: "complete",
+        message: `Error: ${
+          error instanceof Error ? error.message : "Failed to generate PDF"
+        }`,
+      });
+    }
+    return false;
   }
 };
 
-// Add this function at the end of the file
-export const generateTestPDF = async (): Promise<void> => {
+// Test PDF generation with minimal content
+export const generateTestPDF = async (
+  onProgress?: (info: ProgressInfo) => void
+): Promise<boolean> => {
   try {
-    Alert.alert("Test", "Creating minimal PDF...");
+    if (onProgress) {
+      onProgress({
+        step: "init",
+        message: "Creating test PDF...",
+      });
+    }
 
     // Generate a very simple HTML content
     const minimumHtml = `
@@ -212,13 +274,25 @@ export const generateTestPDF = async (): Promise<void> => {
       </html>
     `;
 
+    if (onProgress) {
+      onProgress({
+        step: "creating",
+        message: "Creating PDF file...",
+      });
+    }
+
     // Generate the PDF file
     const { uri } = await Print.printToFileAsync({
       html: minimumHtml,
       base64: false,
     });
 
-    Alert.alert("Success", "Minimal PDF created!");
+    if (onProgress) {
+      onProgress({
+        step: "sharing",
+        message: "Preparing to share test PDF...",
+      });
+    }
 
     // Generate filename for Android
     const fileName = `test_${new Date().toISOString().split("T")[0]}.pdf`;
@@ -241,12 +315,25 @@ export const generateTestPDF = async (): Promise<void> => {
         dialogTitle: "Save or Share Test PDF",
       });
     }
+
+    if (onProgress) {
+      onProgress({
+        step: "complete",
+        message: "Test PDF created successfully!",
+      });
+    }
+
+    return true;
   } catch (error) {
     console.error("Test PDF Error:", error);
-    Alert.alert(
-      "Error",
-      "Failed to create test PDF: " +
-        (error instanceof Error ? error.message : "Unknown error")
-    );
+    if (onProgress) {
+      onProgress({
+        step: "complete",
+        message: `Error: ${
+          error instanceof Error ? error.message : "Failed to create test PDF"
+        }`,
+      });
+    }
+    return false;
   }
 };

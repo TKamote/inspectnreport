@@ -11,12 +11,13 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // Import Ionicons for icons
 import * as ImagePicker from "expo-image-picker"; // Import ImagePicker
 import HeaderFooter from "../components/HeaderFooter";
 import { HeaderData, SetHeaderData } from "../types/types"; // Import the types
-import { generatePDF } from "../components/PDFGenerator"; // Import generatePDF
+import { generatePDF, ProgressInfo } from "../components/PDFGenerator"; // Import generatePDF
 import { PDFTemplate } from "../types/pdfTypes";
 
 export default function InputScreen({ route }: { route: any }) {
@@ -35,6 +36,11 @@ export default function InputScreen({ route }: { route: any }) {
   ]);
 
   const [isModalVisible, setModalVisible] = useState(false); // State for modal visibility
+  const [isGenerating, setIsGenerating] = useState(false); // State for PDF generation
+  const [progressInfo, setProgressInfo] = useState<ProgressInfo>({
+    step: "init",
+    message: "Preparing...",
+  });
 
   const updateHeaderData: SetHeaderData = (field, value) => {
     setHeaderData((prev) => ({ ...prev, [field]: value }));
@@ -120,39 +126,73 @@ export default function InputScreen({ route }: { route: any }) {
   };
 
   const handleGeneratePDF = () => {
+    // First ask if they want to include header information
     Alert.alert(
-      "Add Header to Report?",
-      "Do you want to include company and contact information in your report?",
+      "Include Header?",
+      "Would you like to include header information in your PDF?",
       [
         {
           text: "Yes",
-          onPress: () => setModalVisible(true), // Show the modal
+          onPress: () => {
+            // Show header input modal if yes
+            setModalVisible(true);
+          },
         },
         {
           text: "No",
           onPress: () => {
-            // Generate PDF without header
-            generatePDF({
-              cards,
-              headerData,
-              template: template as PDFTemplate,
-              includeHeader: false,
-            });
+            // Start generating PDF without showing header input modal
+            setIsGenerating(true);
+
+            generatePDF(
+              {
+                cards,
+                headerData: {
+                  ...headerData,
+                  typeOfReport: "Inspection Report", // Set default title
+                },
+                template: template as PDFTemplate,
+                includeHeader: false, // Don't include detailed header
+              },
+              (info) => {
+                // Update progress info for the loading indicator
+                setProgressInfo(info);
+
+                // When complete, hide the loading indicator
+                if (info.step === "complete") {
+                  setTimeout(() => setIsGenerating(false), 1000);
+                }
+              }
+            );
           },
         },
-      ]
+      ],
+      { cancelable: false }
     );
   };
 
   const closeModalAndGeneratePDF = () => {
     setModalVisible(false);
-    // Generate PDF with header
-    generatePDF({
-      cards,
-      headerData,
-      template: template as PDFTemplate,
-      includeHeader: true,
-    });
+    // Start generating PDF with header
+    setIsGenerating(true);
+
+    generatePDF(
+      {
+        cards,
+        headerData, // Use the header data that was entered in the modal
+        template: template as PDFTemplate,
+        includeHeader: true, // Include header since they filled it out
+      },
+      (info) => {
+        // Update progress info for the loading indicator
+        setProgressInfo(info);
+
+        // When complete, hide the loading indicator
+        if (info.step === "complete") {
+          setTimeout(() => setIsGenerating(false), 1000);
+        }
+      }
+    );
   };
 
   const hideObservations = template === "A4Portrait4x6";
@@ -280,6 +320,27 @@ export default function InputScreen({ route }: { route: any }) {
                 </TouchableOpacity>
               </View>
             </ScrollView>
+          </View>
+        </Modal>
+
+        {/* Loading Modal */}
+        <Modal transparent={true} visible={isGenerating} animationType="fade">
+          <View style={styles.modalBackground}>
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#007BFF" />
+              <Text style={styles.loadingText}>{progressInfo.message}</Text>
+
+              {progressInfo.progress !== undefined && (
+                <View style={styles.progressBar}>
+                  <View
+                    style={[
+                      styles.progressFill,
+                      { width: `${progressInfo.progress}%` },
+                    ]}
+                  />
+                </View>
+              )}
+            </View>
           </View>
         </Modal>
       </ScrollView>
@@ -478,5 +539,35 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    width: "80%",
+  },
+  loadingText: {
+    marginTop: 15,
+    fontSize: 16,
+    textAlign: "center",
+  },
+  progressBar: {
+    height: 6,
+    width: "100%",
+    backgroundColor: "#f0f0f0",
+    borderRadius: 3,
+    marginTop: 15,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#007BFF",
   },
 });
