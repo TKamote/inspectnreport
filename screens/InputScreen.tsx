@@ -211,6 +211,16 @@ export default function InputScreen({ route }: { route: any }) {
 
   const hideObservations = template === "A4Portrait4x6";
 
+  const hasValidContent = () => {
+    // Consider a card valid if it has either a location, observations, or a photo
+    return cards.some(
+      (card) =>
+        card.location.trim() !== "" ||
+        card.observations?.trim() !== "" ||
+        card.photo !== null
+    );
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -218,6 +228,24 @@ export default function InputScreen({ route }: { route: any }) {
     >
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>{getTemplateDisplayName(template)}</Text>
+
+        {/* Moved PDF Button to top */}
+        <TouchableOpacity
+          style={[
+            styles.pdfButton,
+            !hasValidContent() && styles.pdfDisabledButton, // Use specific style for PDF button
+          ]}
+          onPress={handleGeneratePDF}
+          disabled={!hasValidContent()}
+        >
+          <Ionicons
+            name="download-outline"
+            size={20}
+            color="#fff"
+            style={styles.pdfIcon}
+          />
+          <Text style={styles.pdfButtonText}>PDF</Text>
+        </TouchableOpacity>
 
         {template === "A4Portrait4x6" && (
           <Text style={styles.infoText}>
@@ -298,17 +326,6 @@ export default function InputScreen({ route }: { route: any }) {
           <Text style={styles.addButtonText}>ADD</Text>
         </TouchableOpacity>
 
-        {/* Generate PDF Button */}
-        <TouchableOpacity style={styles.pdfButton} onPress={handleGeneratePDF}>
-          <Ionicons
-            name="download-outline"
-            size={20}
-            color="#fff"
-            style={styles.pdfIcon}
-          />
-          <Text style={styles.pdfButtonText}>PDF</Text>
-        </TouchableOpacity>
-
         {/* Modal for Header/Footer */}
         <Modal
           visible={isModalVisible}
@@ -349,7 +366,7 @@ export default function InputScreen({ route }: { route: any }) {
         <Modal transparent={true} visible={isGenerating} animationType="fade">
           <View style={styles.modalBackground}>
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={COLORS.RED}/>
+              <ActivityIndicator size="large" color={COLORS.RED} />
               <Text style={styles.loadingText}>{progressInfo.message}</Text>
 
               {progressInfo.progress !== undefined && (
@@ -379,13 +396,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    fontWeight: FONTS.WEIGHTS.BOLD, 
+    fontWeight: FONTS.WEIGHTS.BOLD,
     marginBottom: 20,
     textAlign: "center",
-    color: COLORS.MIDNIGHT,  
+    color: COLORS.MIDNIGHT,
   },
   infoText: {
-    color: COLORS.MIDNIGHT,  
+    color: COLORS.MIDNIGHT,
     fontSize: 14,
     textAlign: "center",
     marginBottom: 15,
@@ -514,8 +531,14 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 5,
     alignSelf: "center",
-    marginTop: 10,
-    width: "100%", // Match the card width
+    marginBottom: 20, // Add margin bottom instead of top
+    width: "100%",
+  },
+  disabledButton: {
+    backgroundColor: COLORS.BORDER,
+  },
+  pdfDisabledButton: {
+    backgroundColor: "rgba(227, 6, 19, 0.3)", // Faded red
   },
   pdfButtonText: {
     color: "#fff",
@@ -602,6 +625,6 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#007BFF",
+    backgroundColor: COLORS.RED,
   },
 });
