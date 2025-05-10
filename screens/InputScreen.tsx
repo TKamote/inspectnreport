@@ -19,6 +19,7 @@ import HeaderFooter from "../components/HeaderFooter";
 import { HeaderData, SetHeaderData } from "../types/types"; // Import the types
 import { generatePDF, ProgressInfo } from "../components/PDFGenerator"; // Import generatePDF
 import { PDFTemplate } from "../types/pdfTypes";
+import { COLORS, FONTS } from "../theme/theme";
 
 const getTemplateDisplayName = (templateCode: string): string => {
   const displayNames: Record<string, string> = {
@@ -348,7 +349,7 @@ export default function InputScreen({ route }: { route: any }) {
         <Modal transparent={true} visible={isGenerating} animationType="fade">
           <View style={styles.modalBackground}>
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#007BFF" />
+              <ActivityIndicator size="large" color={COLORS.RED}/>
               <Text style={styles.loadingText}>{progressInfo.message}</Text>
 
               {progressInfo.progress !== undefined && (
@@ -374,15 +375,17 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: "#fff",
     padding: 20,
+    fontFamily: FONTS.FAMILY,
   },
   title: {
     fontSize: 14,
-    fontWeight: "bold",
+    fontWeight: FONTS.WEIGHTS.BOLD, 
     marginBottom: 20,
     textAlign: "center",
+    color: COLORS.MIDNIGHT,  
   },
   infoText: {
-    color: "#007BFF",
+    color: COLORS.MIDNIGHT,  
     fontSize: 14,
     textAlign: "center",
     marginBottom: 15,
@@ -392,7 +395,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 15,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: COLORS.BORDER,
     borderRadius: 5,
     backgroundColor: "#f9f9f9",
   },
@@ -400,7 +403,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 40,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: COLORS.BORDER,
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
@@ -412,7 +415,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#003E51",
+    backgroundColor: COLORS.SPACE,
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
@@ -420,9 +423,9 @@ const styles = StyleSheet.create({
     alignSelf: "center", // Center the button horizontally
   },
   photoButtonText: {
-    color: "#fff",
+    color: COLORS.WHITE,
     fontSize: 14,
-    fontWeight: "bold",
+    fontWeight: FONTS.WEIGHTS.BOLD,
     marginLeft: 8,
   },
   photoIcon: {
@@ -453,7 +456,7 @@ const styles = StyleSheet.create({
     width: "100%",
     textAlign: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
-    color: "#fff",
+    color: COLORS.WHITE,
     fontSize: 12,
     paddingVertical: 2,
     zIndex: 100, // Ensure the timestamp is on top
@@ -478,7 +481,7 @@ const styles = StyleSheet.create({
   cardNumber: {
     fontSize: 14,
     color: "#999",
-    fontWeight: "500",
+    fontWeight: FONTS.WEIGHTS.MEDIUM,
   },
   deleteButton: {
     padding: 5,
@@ -487,7 +490,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#003E51",
+    backgroundColor: COLORS.SPACE,
     padding: 12,
     borderRadius: 5,
     alignSelf: "center",
@@ -495,9 +498,9 @@ const styles = StyleSheet.create({
     width: "100%", // Match the card width
   },
   addButtonText: {
-    color: "#fff",
+    color: COLORS.WHITE,
     fontSize: 14,
-    fontWeight: "bold",
+    fontWeight: FONTS.WEIGHTS.BOLD,
     marginLeft: 8,
   },
   addIcon: {
@@ -507,7 +510,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#E30613",
+    backgroundColor: COLORS.RED,
     padding: 12,
     borderRadius: 5,
     alignSelf: "center",

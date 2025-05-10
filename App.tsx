@@ -12,6 +12,8 @@ import InputScreen from "./screens/InputScreen";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { Asset } from "expo-asset";
+import { COLORS, FONTS } from "./theme/theme";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -147,14 +149,15 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.BACKGROUND,
     alignItems: "center",
     justifyContent: "flex-start",
     padding: 35,
+    fontFamily: FONTS.FAMILY,
   },
   title: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: FONTS.WEIGHTS.BOLD,
     marginBottom: 20,
   },
   templateContainer: {
@@ -170,12 +173,13 @@ const styles = StyleSheet.create({
   },
   templateText: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: FONTS.WEIGHTS.MEDIUM,
+    color: COLORS.MIDNIGHT,
   },
   sampleButton: {
     marginTop: 20,
     padding: 15,
-    backgroundColor: "#E30613", 
+    backgroundColor: COLORS.RED, 
     borderRadius: 5,
     alignItems: "center",
     width: "100%",
@@ -186,6 +190,6 @@ const styles = StyleSheet.create({
   sampleButtonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: FONTS.WEIGHTS.BOLD,
   },
 });
