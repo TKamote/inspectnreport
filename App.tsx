@@ -110,31 +110,36 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Select a Template</Text>
-      <FlatList
-        data={templates}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.templateButton}
-            onPress={() =>
-              navigation.navigate("Input", { template: item.value })
-            }
-          >
-            <Text style={styles.templateText}>{item.name}</Text>
-          </TouchableOpacity>
-        )}
-      />
 
-      {/* Sample PDF Button */}
-      <TouchableOpacity
-        style={[styles.sampleButton, !pdfUri && styles.disabledButton]}
-        onPress={openSamplePDF}
-        disabled={!pdfUri}
-      >
-        <Text style={styles.sampleButtonText}>
-          {pdfUri ? "View Sample PDFs" : "Loading Sample PDFs..."}
-        </Text>
-      </TouchableOpacity>
+      {/* Template list */}
+      <View style={styles.templateContainer}>
+        <FlatList
+          data={templates}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.templateButton}
+              onPress={() =>
+                navigation.navigate("Input", { template: item.value })
+              }
+            >
+              <Text style={styles.templateText}>{item.name}</Text>
+            </TouchableOpacity>
+          )}
+          ListFooterComponent={() => (
+            /* Sample PDF Button below the last template */
+            <TouchableOpacity
+              style={[styles.sampleButton, !pdfUri && styles.disabledButton]}
+              onPress={openSamplePDF}
+              disabled={!pdfUri}
+            >
+              <Text style={styles.sampleButtonText}>
+                {pdfUri ? "View Sample PDFs" : "Loading Sample PDFs..."}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
     </View>
   );
 };
@@ -144,20 +149,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
+    justifyContent: "flex-start",
+    padding: 35,
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 20,
   },
+  templateContainer: {
+    width: "100%",
+  },
   templateButton: {
     width: "100%",
     padding: 15,
     backgroundColor: "#f0f0f0",
     borderRadius: 5,
-    marginBottom: 10,
+    marginBottom: 12,
     alignItems: "center",
   },
   templateText: {
@@ -167,7 +175,7 @@ const styles = StyleSheet.create({
   sampleButton: {
     marginTop: 20,
     padding: 15,
-    backgroundColor: "#007BFF",
+    backgroundColor: "#E30613", 
     borderRadius: 5,
     alignItems: "center",
     width: "100%",

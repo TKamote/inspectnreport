@@ -20,6 +20,19 @@ import { HeaderData, SetHeaderData } from "../types/types"; // Import the types
 import { generatePDF, ProgressInfo } from "../components/PDFGenerator"; // Import generatePDF
 import { PDFTemplate } from "../types/pdfTypes";
 
+const getTemplateDisplayName = (templateCode: string): string => {
+  const displayNames: Record<string, string> = {
+    A4Portrait2x2: "A4 Portrait: 2-Col x 2-Row Grid",
+    A4Portrait2x3: "A4 Portrait: 2-Col x 2-Row Grid",
+    A4Landscape3x2: "A4 Landscape: 3-Col x 2-Row Grid",
+    A4Landscape4x2: "A4 Landscape: 4-Col x 2-Row Grid",
+    A4Landscape5x3: "A4 Landscape: 5-Col x 3-Row Grid",
+    A4Portrait4x6: "A4 Portrait: 4-Col x 6-Row Grid",
+  };
+
+  return displayNames[templateCode] || templateCode;
+};
+
 export default function InputScreen({ route }: { route: any }) {
   const { template } = route.params;
 
@@ -203,7 +216,7 @@ export default function InputScreen({ route }: { route: any }) {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Template: {template}</Text>
+        <Text style={styles.title}>{getTemplateDisplayName(template)}</Text>
 
         {template === "A4Portrait4x6" && (
           <Text style={styles.infoText}>
@@ -305,12 +318,20 @@ export default function InputScreen({ route }: { route: any }) {
           <View style={styles.modalContainer}>
             <ScrollView contentContainerStyle={styles.modalScrollContent}>
               <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>
-                  Fill in Header Information
-                </Text>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>
+                    Fill in Header Information
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Ionicons name="close" size={22} color="#003E51" />
+                  </TouchableOpacity>
+                </View>
                 <HeaderFooter
-                  headerData={headerData} // Pass the correct props
-                  setHeaderData={updateHeaderData} // Pass the correct props
+                  headerData={headerData}
+                  setHeaderData={updateHeaderData}
                 />
                 <TouchableOpacity
                   style={styles.modalButton}
@@ -355,7 +376,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
@@ -391,7 +412,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#007BFF",
+    backgroundColor: "#003E51",
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
@@ -466,7 +487,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#007BFF",
+    backgroundColor: "#003E51",
     padding: 12,
     borderRadius: 5,
     alignSelf: "center",
@@ -486,7 +507,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#28a745",
+    backgroundColor: "#E30613",
     padding: 12,
     borderRadius: 5,
     alignSelf: "center",
@@ -509,30 +530,40 @@ const styles = StyleSheet.create({
   },
   modalScrollContent: {
     flexGrow: 1,
-    justifyContent: "flex-start", // Changed from center to flex-start
+    justifyContent: "flex-start",
     alignItems: "center",
     width: "100%",
-    paddingTop: 50, // Add some padding at the top
-    paddingBottom: 30,
+    paddingTop: 50, // Reduced from 50 to 30
+    paddingBottom: 5, // Reduced from 30 to 20
   },
   modalContent: {
-    width: "90%",
+    width: "85%",
     backgroundColor: "#fff",
     borderRadius: 10,
-    padding: 20,
-    maxHeight: "80%",
+    padding: 15, // Reduced from 20 to 15
+    maxHeight: "85%", // Increased from 80% to 85%
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+    width: "100%",
+  },
+  closeButton: {
+    padding: 5,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 16, // Reduced from 18 to 16
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 5, // Reduced from 20 to 5 (because we have header with spacing now)
   },
   modalButton: {
-    backgroundColor: "#007BFF",
+    backgroundColor: "#E30613",
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 5,
     width: "100%",
   },
   modalButtonText: {

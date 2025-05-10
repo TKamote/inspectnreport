@@ -307,7 +307,7 @@ export const generateA4Landscape3x2 = (
           display: grid;
           grid-template-columns: 1fr 1fr 1fr; /* 3 columns */
           grid-template-rows: 1fr 1fr; /* 2 rows */
-          gap: 5px 30px; /* Reduced vertical gap from 15px to 5px */
+          gap: 5px 50px; /* Reduced vertical gap from 15px to 5px */
           margin-bottom: 2px;
           width: 85%; /* Reduced from 95% to create more vertical space */
           margin-left: auto;
