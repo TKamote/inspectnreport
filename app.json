@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "inspectnreport",
-    "slug": "inspectnreport",
+    "name": "pdfreportmaker",
+    "slug": "PDFReportMaker",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,7 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses your camera to take photos for your reports.",
+        "NSPhotoLibraryUsageDescription": "This app accesses your photos to let you share them in your reports."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +30,14 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them in your reports.",
+          "cameraPermission": "The app uses your camera to take photos for your reports."
+        }
+      ]
     ]
   }
 }

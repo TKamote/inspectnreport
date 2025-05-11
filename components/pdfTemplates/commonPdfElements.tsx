@@ -103,7 +103,7 @@ export const generateCommonStyles = (): string => {
     }
     .timestamp {
       position: absolute;
-      bottom: 0;
+      bottom: 2px; // Changed from bottom: 0
       width: 100%;
       background-color: rgba(0, 0, 0, 0.5);
       color: white;
@@ -202,7 +202,7 @@ export const generateFooterHTML = (
 ): string => {
   return `
     <div class="footer">
-      <div class="developer">Developed by: David Onquit</div>
+      <div class="developer">Email @ admin.PDFReportMaker.site or visit https://pdfreportmaker.site/ for more info</div>
       <div class="page-number">
         Page ${currentPage} of ${totalPages}
       </div>

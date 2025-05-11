@@ -1,5 +1,6 @@
 {
-  "name": "inspectnreport",
+  "name": "pdfreportmaker",
+  "slug": "PDFReportMaker",
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -220,6 +220,21 @@ export default function InputScreen({ route }: { route: any }) {
         card.photo !== null
     );
   };
+
+  useEffect(() => {
+    const checkPermissions = async () => {
+      const { status: existingStatus } =
+        await ImagePicker.getCameraPermissionsAsync();
+
+      if (existingStatus !== "granted") {
+        console.log("No camera permission, requesting...");
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        console.log("Camera permission status after request:", status);
+      }
+    };
+
+    checkPermissions();
+  }, []);
 
   return (
     <KeyboardAvoidingView

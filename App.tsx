@@ -22,7 +22,11 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Input" component={InputScreen} />
+        <Stack.Screen 
+      name="Input" 
+      component={InputScreen} 
+      options={{ title: "PDF Report Maker" }}
+    />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -111,6 +115,7 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.headTitle}>PDF Report Maker</Text>
       <Text style={styles.title}>Select a Template</Text>
 
       {/* Template list */}
@@ -154,6 +159,12 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     padding: 35,
     fontFamily: FONTS.FAMILY,
+  },
+  headTitle: {
+    fontSize: 24,
+    fontWeight: FONTS.WEIGHTS.BOLD,
+    marginBottom: 20,
+    color: COLORS.MIDNIGHT,
   },
   title: {
     fontSize: 18,
