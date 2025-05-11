@@ -24,7 +24,7 @@ import { COLORS, FONTS } from "../theme/theme";
 const getTemplateDisplayName = (templateCode: string): string => {
   const displayNames: Record<string, string> = {
     A4Portrait2x2: "A4 Portrait: 2-Col x 2-Row Grid",
-    A4Portrait2x3: "A4 Portrait: 2-Col x 2-Row Grid",
+    A4Portrait2x3: "A4 Portrait: 2-Col x 3-Row Grid",
     A4Landscape3x2: "A4 Landscape: 3-Col x 2-Row Grid",
     A4Landscape4x2: "A4 Landscape: 4-Col x 2-Row Grid",
     A4Landscape5x3: "A4 Landscape: 5-Col x 3-Row Grid",
