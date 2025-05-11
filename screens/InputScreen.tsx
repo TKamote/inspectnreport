@@ -87,7 +87,7 @@ export default function InputScreen({ route }: { route: any }) {
           text: "Take Photo",
           onPress: async () => {
             const result = await ImagePicker.launchCameraAsync({
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              mediaTypes: "images", // This string value works with new API
               allowsEditing: true,
               quality: 1,
             });
@@ -112,7 +112,7 @@ export default function InputScreen({ route }: { route: any }) {
           text: "Choose from Gallery",
           onPress: async () => {
             const result = await ImagePicker.launchImageLibraryAsync({
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              mediaTypes: "images", // This string value works with new API
               allowsEditing: true,
               quality: 1,
             });
