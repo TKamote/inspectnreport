@@ -13,6 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "icon": "./assets/icon.png",
+      "bundleIdentifier": "com.inspection.pdfreportmaker",
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses your camera to take photos for your reports.",
@@ -20,6 +22,8 @@
       }
     },
     "android": {
+      "icon": "./assets/icon.png",
+      "package": "com.inspection.pdfreportmaker",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

@@ -5,6 +5,8 @@ import {
   View,
   FlatList,
   TouchableOpacity,
+  Linking,
+  Pressable,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -166,6 +168,14 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
           )}
         />
       </View>
+      <View style={styles.footer}>
+        <Pressable onPress={() => Linking.openURL('https://pdfreportmaker.site/privacy-policy')}>
+          <Text style={styles.privacyText}>Privacy Policy</Text>
+        </Pressable>
+        <Pressable onPress={() => Linking.openURL('https://pdfreportmaker.site/guide')}>
+          <Text style={styles.linkText}>How to Use This App</Text>
+        </Pressable>
+      </View>
     </View>
   );
 };
@@ -221,5 +231,23 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: FONTS.WEIGHTS.BOLD,
+  },
+  footer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    alignItems: 'center',
+    marginTop: "auto",        // Adjusts distance from screen bottom
+  },
+  privacyText: {
+    fontSize: 12,
+    color: '#888',
+    textDecorationLine: 'underline',
+  },
+  linkText: {
+    fontSize: 12,
+    color: COLORS.MIDNIGHT,
+    textDecorationLine: 'underline',
   },
 });
