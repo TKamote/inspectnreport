@@ -23,10 +23,10 @@ export default function App() {
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen 
-      name="Input" 
-      component={InputScreen} 
-      options={{ title: "PDF Report Maker" }}
-    />
+          name="Input" 
+          component={InputScreen} 
+          options={{ title: "PDF Report Maker" }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -39,26 +39,45 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
   useEffect(() => {
     async function preparePdf() {
       try {
-        // Create a destination path in the document directory
-        const destPath = FileSystem.documentDirectory + "SamplePDFdownload.pdf";
+        // Version for cache busting
+        const pdfVersion = "v1";
+        
+        // Create a destination path with the new name
+        const destPath = FileSystem.documentDirectory + `SamplePDF_${pdfVersion}.pdf`;
+        
+        // Check if old file exists and delete it
+        try {
+          const oldPath = FileSystem.documentDirectory + "SamplePDFdownload.pdf";
+          const oldFileInfo = await FileSystem.getInfoAsync(oldPath);
+          if (oldFileInfo.exists) {
+            await FileSystem.deleteAsync(oldPath);
+            console.log("Deleted old PDF file");
+          }
+        } catch (error) {
+          console.log("Error checking/deleting old file:", error);
+        }
 
-        // Check if the file already exists
+        // Check if the new file already exists
         const fileInfo = await FileSystem.getInfoAsync(destPath);
 
-        if (!fileInfo.exists) {
-          // Load the asset
-          const asset = Asset.fromModule(
-            require("./assets/SamplePDFdownload.pdf")
-          );
-          await asset.downloadAsync();
+        // Always recreate the file to ensure we have the latest version
+        if (fileInfo.exists) {
+          await FileSystem.deleteAsync(destPath);
+          console.log("Deleted existing PDF to refresh");
+        }
 
-          // Copy to a location that can be shared
-          if (asset.localUri) {
-            await FileSystem.copyAsync({
-              from: asset.localUri,
-              to: destPath,
-            });
-          }
+        // Load the asset with the new filename
+        const asset = Asset.fromModule(
+          require("./assets/SamplePDF.pdf")
+        );
+        await asset.downloadAsync();
+
+        // Copy to a location that can be shared
+        if (asset.localUri) {
+          await FileSystem.copyAsync({
+            from: asset.localUri,
+            to: destPath,
+          });
         }
 
         // Set the final URI
