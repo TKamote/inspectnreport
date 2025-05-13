@@ -227,9 +227,7 @@ export default function InputScreen({ route }: { route: any }) {
         await ImagePicker.getCameraPermissionsAsync();
 
       if (existingStatus !== "granted") {
-        console.log("No camera permission, requesting...");
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        console.log("Camera permission status after request:", status);
       }
     };
 

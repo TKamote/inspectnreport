@@ -202,7 +202,7 @@ export const generateFooterHTML = (
 ): string => {
   return `
     <div class="footer">
-      <div class="developer">Email @ admin.PDFReportMaker.site or visit https://pdfreportmaker.site/ for more info</div>
+      <div class="developer">Developer: PDF Report Maker</div>
       <div class="page-number">
         Page ${currentPage} of ${totalPages}
       </div>

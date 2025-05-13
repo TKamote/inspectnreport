@@ -53,10 +53,8 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
           const oldFileInfo = await FileSystem.getInfoAsync(oldPath);
           if (oldFileInfo.exists) {
             await FileSystem.deleteAsync(oldPath);
-            console.log("Deleted old PDF file");
           }
         } catch (error) {
-          console.log("Error checking/deleting old file:", error);
         }
 
         // Check if the new file already exists
@@ -65,7 +63,6 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
         // Always recreate the file to ensure we have the latest version
         if (fileInfo.exists) {
           await FileSystem.deleteAsync(destPath);
-          console.log("Deleted existing PDF to refresh");
         }
 
         // Load the asset with the new filename
@@ -84,13 +81,8 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
 
         // Set the final URI
         setPdfUri(destPath);
-        console.log("PDF ready at:", destPath);
       } catch (error) {
-        console.error("Failed to prepare PDF:", error);
-        alert(
-          "Failed to prepare PDF: " +
-            (error instanceof Error ? error.message : String(error))
-        );
+        alert("Sorry, there was a problem loading the sample PDF. Please try again later.");
       }
     }
 
@@ -123,11 +115,7 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
           alert("Sharing is not available on this device");
         }
       } catch (error) {
-        console.error("Error opening PDF:", error);
-        alert(
-          "Error opening PDF file: " +
-            (error instanceof Error ? error.message : String(error))
-        );
+        alert("Sorry, there was a problem opening the sample PDF. Please try again later.");
       }
     } else {
       alert("PDF is still loading or failed to load. Please try again.");
@@ -173,7 +161,7 @@ const HomeScreen = ({ navigation }: { navigation: any }) => {
           <Text style={styles.privacyText}>Privacy Policy</Text>
         </Pressable>
         <Pressable onPress={() => Linking.openURL('https://pdfreportmaker.site/guide')}>
-          <Text style={styles.linkText}>How to Use This App</Text>
+          <Text style={styles.linkText}>User guide</Text>
         </Pressable>
       </View>
     </View>
@@ -248,6 +236,6 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: 12,
     color: COLORS.MIDNIGHT,
-    textDecorationLine: 'underline',
+    textDecorationLine: 'none',
   },
 });
