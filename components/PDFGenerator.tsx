@@ -3,6 +3,7 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
+// ... (rest of your imports remain the same)
 import { HeaderData } from "../types/types";
 import { CardData, PDFTemplate, PDFGenerationOptions } from "../types/pdfTypes";
 
@@ -13,6 +14,7 @@ import { generateA4Landscape3x2 } from "./pdfTemplates/A4Landscape3x2";
 import { generateA4Landscape4x2 } from "./pdfTemplates/A4Landscape4x2";
 import { generateA4Landscape5x3 } from "./pdfTemplates/A4Landscape5x3";
 import { generateA4Portrait4x6 } from "./pdfTemplates/A4Portrait4x6";
+
 
 // Define progress types
 export type ProgressStep =
@@ -31,24 +33,23 @@ export type ProgressInfo = {
   current?: number; // Current item being processed
 };
 
+// Helper function to pad numbers for timestamp
+const pad = (num: number): string => num.toString().padStart(2, '0');
+
 // Compress image and convert to base64
 const compressAndConvertToBase64 = async (uri: string): Promise<string> => {
   try {
-    // First compress the image
     const compressedImage = await ImageManipulator.manipulateAsync(
       uri,
-      [{ resize: { width: 600 } }], // Resize to max width of 600px
-      { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG } // 60% quality JPEG
+      [{ resize: { width: 600 } }],
+      { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
     );
-
-    // Then convert to base64
     const base64 = await FileSystem.readAsStringAsync(compressedImage.uri, {
       encoding: FileSystem.EncodingType.Base64,
     });
-
     return `data:image/jpeg;base64,${base64}`;
   } catch (error) {
-    console.error("Error compressing and converting image:", error);
+    // Consider logging this error to a service or providing more specific feedback
     return "";
   }
 };
@@ -59,18 +60,30 @@ const processCardsWithCompressedImages = async (
   onProgress?: (info: ProgressInfo) => void
 ): Promise<CardData[]> => {
   const processedCards = [...cards];
-  const totalImages = processedCards.filter((card) => card.photo).length;
+  const imagesToProcess = processedCards.filter((card) => card.photo);
+  const totalImages = imagesToProcess.length;
   let processedCount = 0;
+
+  if (totalImages === 0 && onProgress) {
+     // If no images, briefly show compressing step as complete
+    onProgress({
+      step: "compressing",
+      message: "No images to process.",
+      progress: 100,
+      total: 0,
+      current: 0,
+    });
+  }
+
 
   for (let i = 0; i < processedCards.length; i++) {
     if (processedCards[i].photo) {
       try {
-        // Update progress
         if (onProgress) {
           onProgress({
             step: "compressing",
             message: `Processing image ${processedCount + 1} of ${totalImages}`,
-            progress: Math.round((processedCount / totalImages) * 100),
+            progress: Math.round(((processedCount + 1) / totalImages) * 100), // Progress based on completion
             total: totalImages,
             current: processedCount + 1,
           });
@@ -83,21 +96,20 @@ const processCardsWithCompressedImages = async (
           ...processedCards[i],
           photo: compressedBase64Image,
         };
-
         processedCount++;
       } catch (error) {
-        console.error(`Error processing image for card ${i}:`, error);
+        // Error handling: You might want to set photo to null or a placeholder
+        // and potentially notify the user or log the specific card that failed.
+        // For now, it just skips, as in your original code.
       }
     }
   }
-
   return processedCards;
 };
 
 // Main generator function that selects the appropriate template
 const generateHTMLByTemplate = (options: PDFGenerationOptions): string => {
   const { cards, headerData, template, includeHeader } = options;
-
   switch (template) {
     case "A4Portrait2x2":
       return generateA4Portrait2x2(cards, headerData, includeHeader);
@@ -112,7 +124,6 @@ const generateHTMLByTemplate = (options: PDFGenerationOptions): string => {
     case "A4Portrait4x6":
       return generateA4Portrait4x6(cards, headerData, includeHeader);
     default:
-      console.warn(`Unknown template: ${template}, falling back to default`);
       return generateA4Portrait2x2(cards, headerData, includeHeader);
   }
 };
@@ -123,124 +134,84 @@ export const generatePDF = async (
   onProgress?: (info: ProgressInfo) => void
 ): Promise<boolean> => {
   try {
-    // Start generation process
-    if (onProgress) {
-      onProgress({
-        step: "init",
-        message: "Starting PDF generation process...",
-      });
-    }
+    if (onProgress) onProgress({ step: "init", message: "Starting PDF generation..." });
 
-    console.log("PDF generation started", options.template);
-    console.log("Cards count:", options.cards.length);
-
-    // Process cards to convert and compress image URIs to base64
+    const imagesToProcessCount = options.cards.filter((card) => card.photo).length;
     if (onProgress) {
       onProgress({
         step: "compressing",
-        message: "Processing images...",
+        message: imagesToProcessCount > 0 ? "Processing images..." : "No images to process.",
         progress: 0,
-        total: options.cards.filter((card) => card.photo).length,
+        total: imagesToProcessCount,
         current: 0,
       });
     }
 
-    const processedCards = await processCardsWithCompressedImages(
-      options.cards,
-      onProgress
-    );
+    const processedCards = await processCardsWithCompressedImages(options.cards, onProgress);
 
-    console.log("Images processed successfully:", processedCards.length);
-
-    // Generate HTML content
-    if (onProgress) {
-      onProgress({
-        step: "generating",
-        message: "Generating PDF content...",
-      });
+    if (imagesToProcessCount > 0 && onProgress) { // Ensure compressing shows 100% if images were processed
+        onProgress({
+            step: "compressing",
+            message: "Image processing complete.",
+            progress: 100,
+            total: imagesToProcessCount,
+            current: imagesToProcessCount,
+        });
     }
 
-    console.log("Generating HTML with template:", options.template);
-    const htmlContent = generateHTMLByTemplate({
-      ...options,
-      cards: processedCards,
-    });
 
-    console.log("HTML generated, length:", htmlContent.length);
+    if (onProgress) onProgress({ step: "generating", message: "Generating PDF content..." });
+    const htmlContent = generateHTMLByTemplate({ ...options, cards: processedCards });
 
-    // Create PDF file
-    if (onProgress) {
-      onProgress({
-        step: "creating",
-        message: "Creating PDF file...",
-      });
-    }
-
-    // Determine PDF dimensions based on template
+    if (onProgress) onProgress({ step: "creating", message: "Creating PDF file..." });
     const isLandscape = options.template.includes("Landscape");
     const dimensions = isLandscape
-      ? { width: 841.89, height: 595.28 } // A4 landscape
-      : { width: 595.28, height: 841.89 }; // A4 portrait
+      ? { width: 841.89, height: 595.28 }
+      : { width: 595.28, height: 841.89 };
 
-    console.log("Using dimensions:", dimensions);
-
-    // Generate the PDF file
-    const { uri } = await Print.printToFileAsync({
+    const { uri: temporaryPdfUri } = await Print.printToFileAsync({
       html: htmlContent,
       base64: false,
       ...dimensions,
     });
 
-    console.log("PDF created successfully at:", uri);
+    // --- FILENAME GENERATION AND MOVING ---
+    const now = new Date();
+    const timestamp = `${pad(now.getFullYear())}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    const fileName = `PDF_${timestamp}.pdf`;
+    const newFilePath = `${FileSystem.documentDirectory}${fileName}`; // Ensure .pdf extension
 
-    // Prepare for sharing
-    if (onProgress) {
-      onProgress({
-        step: "sharing",
-        message: "Preparing to share PDF...",
-      });
+    // Move/rename the file to apply the new filename
+    // Using moveAsync is generally better as it doesn't keep the original temporary file
+    await FileSystem.moveAsync({
+      from: temporaryPdfUri,
+      to: newFilePath,
+    });
+    // --- END FILENAME GENERATION AND MOVING ---
+
+
+    if (onProgress) onProgress({ step: "sharing", message: "Preparing to share PDF..." });
+
+    const shareOptions: Sharing.SharingOptions = {
+      mimeType: "application/pdf",
+      dialogTitle: Platform.OS === 'ios' ? fileName : "Save or Share PDF Report", // On iOS, this can be a suggestion
+    };
+     if (Platform.OS === 'ios') {
+        shareOptions.UTI = ".pdf";
     }
 
-    // Handle PDF sharing based on platform
-    const fileName = `report_${new Date().toISOString().split("T")[0]}.pdf`;
+    // Share the NEWLY NAMED file
+    await Sharing.shareAsync(newFilePath, shareOptions);
 
-    if (Platform.OS === "ios") {
-      // On iOS, use the Sharing API
-      await Sharing.shareAsync(uri, {
-        UTI: ".pdf",
-        mimeType: "application/pdf",
-      });
-    } else {
-      // On Android, save to downloads folder and share
-      const downloadPath = FileSystem.documentDirectory + fileName;
-      await FileSystem.copyAsync({
-        from: uri,
-        to: downloadPath,
-      });
 
-      await Sharing.shareAsync(downloadPath, {
-        mimeType: "application/pdf",
-        dialogTitle: "Save or Share PDF Report",
-      });
-    }
-
-    // Complete generation process
-    if (onProgress) {
-      onProgress({
-        step: "complete",
-        message: "PDF generated successfully!",
-      });
-    }
-
+    if (onProgress) onProgress({ step: "complete", message: "PDF shared successfully!" });
     return true;
+
   } catch (error) {
-    console.error("PDF Generation Error:", error);
     if (onProgress) {
       onProgress({
         step: "complete",
-        message: `Error: ${
-          error instanceof Error ? error.message : "Failed to generate PDF"
-        }`,
+        message: `Error: ${error instanceof Error ? error.message : "Failed to generate PDF"}`,
       });
     }
     return false;
@@ -252,86 +223,54 @@ export const generateTestPDF = async (
   onProgress?: (info: ProgressInfo) => void
 ): Promise<boolean> => {
   try {
-    if (onProgress) {
-      onProgress({
-        step: "init",
-        message: "Creating test PDF...",
-      });
-    }
+    if (onProgress) onProgress({ step: "init", message: "Creating test PDF..." });
 
-    // Generate a very simple HTML content
     const minimumHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Test PDF</title>
-      </head>
-      <body>
-        <h1>Test PDF</h1>
-        <p>This is a test PDF with minimal content.</p>
-      </body>
-      </html>
-    `;
+      <!DOCTYPE html><html><head><meta charset="utf-8"><title>Test PDF</title></head>
+      <body><h1>Test PDF</h1><p>This is a test PDF with minimal content.</p></body></html>`;
 
-    if (onProgress) {
-      onProgress({
-        step: "creating",
-        message: "Creating PDF file...",
-      });
-    }
+    if (onProgress) onProgress({ step: "creating", message: "Creating PDF file..." });
 
-    // Generate the PDF file
-    const { uri } = await Print.printToFileAsync({
+    const { uri: temporaryPdfUri } = await Print.printToFileAsync({
       html: minimumHtml,
       base64: false,
     });
 
-    if (onProgress) {
-      onProgress({
-        step: "sharing",
-        message: "Preparing to share test PDF...",
-      });
-    }
+    // --- FILENAME GENERATION AND MOVING ---
+    const now = new Date();
+    // Adding Year and Seconds for more uniqueness if tests are run rapidly
+   // MODIFIED TIMESTAMP: MMDD_HHMM (no year)
+   const timestamp = `${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+   // For generatePDF:
+   const fileName = `PDF_${timestamp}.pdf`;
+    const newFilePath = `${FileSystem.documentDirectory}${fileName}`; // Ensure .pdf extension
 
-    // Generate filename for Android
-    const fileName = `test_${new Date().toISOString().split("T")[0]}.pdf`;
+    await FileSystem.moveAsync({
+      from: temporaryPdfUri,
+      to: newFilePath,
+    });
+    // --- END FILENAME GENERATION AND MOVING ---
 
-    // Share the PDF
-    if (Platform.OS === "ios") {
-      await Sharing.shareAsync(uri, {
-        UTI: ".pdf",
+    if (onProgress) onProgress({ step: "sharing", message: "Preparing to share test PDF..." });
+
+    const shareOptions: Sharing.SharingOptions = {
         mimeType: "application/pdf",
-      });
-    } else {
-      const downloadPath = FileSystem.documentDirectory + fileName;
-      await FileSystem.copyAsync({
-        from: uri,
-        to: downloadPath,
-      });
-
-      await Sharing.shareAsync(downloadPath, {
-        mimeType: "application/pdf",
-        dialogTitle: "Save or Share Test PDF",
-      });
+        dialogTitle: Platform.OS === 'ios' ? fileName : "Save or Share Test PDF",
+    };
+    if (Platform.OS === 'ios') {
+        shareOptions.UTI = ".pdf";
     }
 
-    if (onProgress) {
-      onProgress({
-        step: "complete",
-        message: "Test PDF created successfully!",
-      });
-    }
+    await Sharing.shareAsync(newFilePath, shareOptions);
 
+    if (onProgress) onProgress({ step: "complete", message: "Test PDF shared successfully!" });
     return true;
+
   } catch (error) {
-    console.error("Test PDF Error:", error);
     if (onProgress) {
       onProgress({
         step: "complete",
-        message: `Error: ${
-          error instanceof Error ? error.message : "Failed to create test PDF"
-        }`,
+        message: `Error: ${error instanceof Error ? error.message : "Failed to create test PDF"}`,
       });
     }
     return false;

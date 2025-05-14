@@ -87,23 +87,24 @@ export default function InputScreen({ route }: { route: any }) {
           text: "Take Photo",
           onPress: async () => {
             const result = await ImagePicker.launchCameraAsync({
-              mediaTypes: "images", // This string value works with new API
+              mediaTypes: "images",
               allowsEditing: true,
               quality: 1,
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
+              // For camera photos, keep the timestamp
               const timestamp = new Date().toLocaleString(undefined, {
                 year: "numeric",
                 month: "numeric",
                 day: "numeric",
                 hour: "2-digit",
                 minute: "2-digit",
-              }); // Generate timestamp
+              });
               updateCard(index, {
                 ...cards[index],
                 photo: result.assets[0].uri,
-                timestamp: timestamp,
+                timestamp: timestamp, // Include timestamp for camera photos
               });
             }
           },
@@ -112,23 +113,17 @@ export default function InputScreen({ route }: { route: any }) {
           text: "Choose from Gallery",
           onPress: async () => {
             const result = await ImagePicker.launchImageLibraryAsync({
-              mediaTypes: "images", // This string value works with new API
+              mediaTypes: "images",
               allowsEditing: true,
               quality: 1,
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
-              const timestamp = new Date().toLocaleString(undefined, {
-                year: "numeric",
-                month: "numeric",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              }); // Generate timestamp
+              // For gallery photos, don't add a timestamp
               updateCard(index, {
                 ...cards[index],
                 photo: result.assets[0].uri,
-                timestamp: timestamp,
+                timestamp: null, // No timestamp for gallery photos
               });
             }
           },
@@ -251,13 +246,15 @@ export default function InputScreen({ route }: { route: any }) {
           onPress={handleGeneratePDF}
           disabled={!hasValidContent()}
         >
-          <Ionicons
-            name="download-outline"
-            size={20}
-            color="#fff"
-            style={styles.pdfIcon}
-          />
-          <Text style={styles.pdfButtonText}>PDF</Text>
+          <View style={{flexDirection: "row", alignItems: "center", justifyContent: "center"}}>
+            <Ionicons
+              name="download-outline"
+              size={20}
+              color="#fff"
+              style={{marginRight: 8}}
+            />
+            <Text style={styles.modalButtonText}>PDF</Text>
+          </View>
         </TouchableOpacity>
 
         {template === "A4Portrait4x6" && (
@@ -368,7 +365,15 @@ export default function InputScreen({ route }: { route: any }) {
                   style={styles.modalButton}
                   onPress={closeModalAndGeneratePDF}
                 >
-                  <Text style={styles.modalButtonText}>Generate PDF</Text>
+                  <View style={{flexDirection: "row", alignItems: "center", justifyContent: "center"}}>
+                    <Ionicons
+                      name="download-outline"
+                      size={20}
+                      color="#fff"
+                      style={{marginRight: 8}}
+                    />
+                    <Text style={styles.modalButtonText}>PDF</Text>
+                  </View>
                 </TouchableOpacity>
               </View>
             </ScrollView>

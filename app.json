@@ -18,7 +18,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses your camera to take photos for your reports.",
-        "NSPhotoLibraryUsageDescription": "This app accesses your photos to let you share them in your reports."
+        "NSPhotoLibraryUsageDescription": "This app accesses your photos to let you share them in your reports.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -28,7 +29,10 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -42,6 +46,11 @@
           "cameraPermission": "The app uses your camera to take photos for your reports."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "132d790c-5157-4887-9805-973addab7a7a"
+      }
+    }
   }
 }
