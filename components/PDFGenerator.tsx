@@ -15,7 +15,6 @@ import { generateA4Landscape4x2 } from "./pdfTemplates/A4Landscape4x2";
 import { generateA4Landscape5x3 } from "./pdfTemplates/A4Landscape5x3";
 import { generateA4Portrait4x6 } from "./pdfTemplates/A4Portrait4x6";
 
-
 // Define progress types
 export type ProgressStep =
   | "init"
@@ -39,17 +38,19 @@ const pad = (num: number): string => num.toString().padStart(2, '0');
 // Compress image and convert to base64
 const compressAndConvertToBase64 = async (uri: string): Promise<string> => {
   try {
+    // Better balance between quality and file size
     const compressedImage = await ImageManipulator.manipulateAsync(
       uri,
-      [{ resize: { width: 600 } }],
-      { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
+      [{ resize: { width: 700 } }], // Moderate increase from original 600px
+      { compress: 0.75, format: ImageManipulator.SaveFormat.JPEG } // Moderate increase from original 0.6
     );
+
     const base64 = await FileSystem.readAsStringAsync(compressedImage.uri, {
       encoding: FileSystem.EncodingType.Base64,
     });
+
     return `data:image/jpeg;base64,${base64}`;
   } catch (error) {
-    // Consider logging this error to a service or providing more specific feedback
     return "";
   }
 };
@@ -65,7 +66,7 @@ const processCardsWithCompressedImages = async (
   let processedCount = 0;
 
   if (totalImages === 0 && onProgress) {
-     // If no images, briefly show compressing step as complete
+    // If no images, briefly show compressing step as complete
     onProgress({
       step: "compressing",
       message: "No images to process.",
@@ -74,7 +75,6 @@ const processCardsWithCompressedImages = async (
       current: 0,
     });
   }
-
 
   for (let i = 0; i < processedCards.length; i++) {
     if (processedCards[i].photo) {
@@ -149,16 +149,16 @@ export const generatePDF = async (
 
     const processedCards = await processCardsWithCompressedImages(options.cards, onProgress);
 
-    if (imagesToProcessCount > 0 && onProgress) { // Ensure compressing shows 100% if images were processed
-        onProgress({
-            step: "compressing",
-            message: "Image processing complete.",
-            progress: 100,
-            total: imagesToProcessCount,
-            current: imagesToProcessCount,
-        });
+    if (imagesToProcessCount > 0 && onProgress) {
+      // Ensure compressing shows 100% if images were processed
+      onProgress({
+        step: "compressing",
+        message: "Image processing complete.",
+        progress: 100,
+        total: imagesToProcessCount,
+        current: imagesToProcessCount,
+      });
     }
-
 
     if (onProgress) onProgress({ step: "generating", message: "Generating PDF content..." });
     const htmlContent = generateHTMLByTemplate({ ...options, cards: processedCards });
@@ -189,20 +189,18 @@ export const generatePDF = async (
     });
     // --- END FILENAME GENERATION AND MOVING ---
 
-
     if (onProgress) onProgress({ step: "sharing", message: "Preparing to share PDF..." });
 
     const shareOptions: Sharing.SharingOptions = {
       mimeType: "application/pdf",
       dialogTitle: Platform.OS === 'ios' ? fileName : "Save or Share PDF Report", // On iOS, this can be a suggestion
     };
-     if (Platform.OS === 'ios') {
-        shareOptions.UTI = ".pdf";
+    if (Platform.OS === 'ios') {
+      shareOptions.UTI = ".pdf";
     }
 
     // Share the NEWLY NAMED file
     await Sharing.shareAsync(newFilePath, shareOptions);
-
 
     if (onProgress) onProgress({ step: "complete", message: "PDF shared successfully!" });
     return true;
@@ -239,10 +237,10 @@ export const generateTestPDF = async (
     // --- FILENAME GENERATION AND MOVING ---
     const now = new Date();
     // Adding Year and Seconds for more uniqueness if tests are run rapidly
-   // MODIFIED TIMESTAMP: MMDD_HHMM (no year)
-   const timestamp = `${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
-   // For generatePDF:
-   const fileName = `PDF_${timestamp}.pdf`;
+    // MODIFIED TIMESTAMP: MMDD_HHMM (no year)
+    const timestamp = `${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+    // For generatePDF:
+    const fileName = `PDF_${timestamp}.pdf`;
     const newFilePath = `${FileSystem.documentDirectory}${fileName}`; // Ensure .pdf extension
 
     await FileSystem.moveAsync({
@@ -254,11 +252,11 @@ export const generateTestPDF = async (
     if (onProgress) onProgress({ step: "sharing", message: "Preparing to share test PDF..." });
 
     const shareOptions: Sharing.SharingOptions = {
-        mimeType: "application/pdf",
-        dialogTitle: Platform.OS === 'ios' ? fileName : "Save or Share Test PDF",
+      mimeType: "application/pdf",
+      dialogTitle: Platform.OS === 'ios' ? fileName : "Save or Share Test PDF",
     };
     if (Platform.OS === 'ios') {
-        shareOptions.UTI = ".pdf";
+      shareOptions.UTI = ".pdf";
     }
 
     await Sharing.shareAsync(newFilePath, shareOptions);

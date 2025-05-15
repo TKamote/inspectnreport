@@ -56,6 +56,9 @@ export default function InputScreen({ route }: { route: any }) {
     message: "Preparing...",
   });
 
+  const [headerChoiceModalVisible, setHeaderChoiceModalVisible] =
+    useState(false); // State for header choice modal visibility
+
   const updateHeaderData: SetHeaderData = (field, value) => {
     setHeaderData((prev) => ({ ...prev, [field]: value }));
   };
@@ -135,49 +138,8 @@ export default function InputScreen({ route }: { route: any }) {
   };
 
   const handleGeneratePDF = () => {
-    // First ask if they want to include header information
-    Alert.alert(
-      "Include Header?",
-      "Would you like to include header information in your PDF?",
-      [
-        {
-          text: "Yes",
-          onPress: () => {
-            // Show header input modal if yes
-            setModalVisible(true);
-          },
-        },
-        {
-          text: "No",
-          onPress: () => {
-            // Start generating PDF without showing header input modal
-            setIsGenerating(true);
-
-            generatePDF(
-              {
-                cards,
-                headerData: {
-                  ...headerData,
-                  typeOfReport: "Inspection Report", // Set default title
-                },
-                template: template as PDFTemplate,
-                includeHeader: false, // Don't include detailed header
-              },
-              (info) => {
-                // Update progress info for the loading indicator
-                setProgressInfo(info);
-
-                // When complete, hide the loading indicator
-                if (info.step === "complete") {
-                  setTimeout(() => setIsGenerating(false), 1000);
-                }
-              }
-            );
-          },
-        },
-      ],
-      { cancelable: false }
-    );
+    // Show modal instead of alert
+    setHeaderChoiceModalVisible(true);
   };
 
   const closeModalAndGeneratePDF = () => {
@@ -197,6 +159,32 @@ export default function InputScreen({ route }: { route: any }) {
         setProgressInfo(info);
 
         // When complete, hide the loading indicator
+        if (info.step === "complete") {
+          setTimeout(() => setIsGenerating(false), 1000);
+        }
+      }
+    );
+  };
+
+  const generateWithHeader = () => {
+    setHeaderChoiceModalVisible(false);
+    setModalVisible(true); // Show the header input modal
+  };
+
+  const generateWithoutHeader = () => {
+    setHeaderChoiceModalVisible(false);
+    // Start generating PDF without header
+    setIsGenerating(true);
+
+    generatePDF(
+      {
+        cards,
+        headerData: { company: "", createdBy: "", reportFor: "", typeOfReport: "", date: "" },
+        template: template as PDFTemplate,
+        includeHeader: false,
+      },
+      (info) => {
+        setProgressInfo(info);
         if (info.step === "complete") {
           setTimeout(() => setIsGenerating(false), 1000);
         }
@@ -246,12 +234,18 @@ export default function InputScreen({ route }: { route: any }) {
           onPress={handleGeneratePDF}
           disabled={!hasValidContent()}
         >
-          <View style={{flexDirection: "row", alignItems: "center", justifyContent: "center"}}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <Ionicons
               name="download-outline"
               size={20}
               color="#fff"
-              style={{marginRight: 8}}
+              style={{ marginRight: 8 }}
             />
             <Text style={styles.modalButtonText}>PDF</Text>
           </View>
@@ -365,18 +359,66 @@ export default function InputScreen({ route }: { route: any }) {
                   style={styles.modalButton}
                   onPress={closeModalAndGeneratePDF}
                 >
-                  <View style={{flexDirection: "row", alignItems: "center", justifyContent: "center"}}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
                     <Ionicons
                       name="download-outline"
                       size={20}
                       color="#fff"
-                      style={{marginRight: 8}}
+                      style={{ marginRight: 8 }}
                     />
                     <Text style={styles.modalButtonText}>PDF</Text>
                   </View>
                 </TouchableOpacity>
               </View>
             </ScrollView>
+          </View>
+        </Modal>
+
+        {/* Header Choice Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={headerChoiceModalVisible}
+          onRequestClose={() => setHeaderChoiceModalVisible(false)}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>PDF Options</Text>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setHeaderChoiceModalVisible(false)}
+                >
+                  <Ionicons name="close" size={22} color="#003E51" />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.modalText}>
+                Would you like to include a header with company and report information?
+              </Text>
+
+              <View style={styles.modalButtonContainer}>
+                <TouchableOpacity
+                  style={[styles.modalChoiceButton, { backgroundColor: COLORS.SPACE }]}
+                  onPress={() => generateWithoutHeader()}
+                >
+                  <Text style={styles.modalButtonText}>No</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.modalChoiceButton}
+                  onPress={() => generateWithHeader()}
+                >
+                  <Text style={styles.modalButtonText}>Yes</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
         </Modal>
 
@@ -644,5 +686,47 @@ const styles = StyleSheet.create({
   progressFill: {
     height: "100%",
     backgroundColor: COLORS.RED,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalView: {
+    width: "85%",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    color: COLORS.MIDNIGHT,
+    fontSize: 16,
+  },
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    marginTop: 15,
+    paddingHorizontal: 10,
+  },
+  modalChoiceButton: {
+    backgroundColor: COLORS.RED,
+    padding: 5, // 5px padding on all sides
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 80, // Ensure minimum width
   },
 });
