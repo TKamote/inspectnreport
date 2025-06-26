@@ -1,21 +1,30 @@
 import { HeaderData } from "../../types/types";
 
 // Generate common CSS styles for all templates
-export const generateCommonStyles = (): string => {
+export const generateCommonStyles = (template?: string): string => {
+  // Determine image container height based on template
+  const imageHeight = template?.includes("Portrait") ? "180px" : "120px";
+
   return `
+    html {
+      background-color: white !important;
+    }
     body {
       font-family: 'Helvetica Neue', Arial, sans-serif;
       margin: 0;
       padding: 0;
       color: #333;
+      background-color: white !important;
     }
     .container {
       padding: 40px 30px;
+      background-color: white !important;
     }
     .header {
-      margin-bottom: 20px; /* Reduced from 30px */
+      margin-bottom: 20px;
       border-bottom: 1px solid #ddd;
-      padding-bottom: 15px; /* Reduced from 20px */
+      padding-bottom: 15px;
+      background-color: white !important;
     }
     
     /* Add these header row styles */
@@ -73,12 +82,11 @@ export const generateCommonStyles = (): string => {
       text-align: center;
       padding-top: 3px; /* Reduced from 5px */
     }
-    
     .card {
       border: 1px solid #ccc;
       border-radius: 5px;
       overflow: hidden;
-      background-color: #f9f9f9;
+      background-color: white !important;
     }
     .card-header {
       background-color: #007BFF;
@@ -88,18 +96,26 @@ export const generateCommonStyles = (): string => {
     }
     .card-image {
       text-align: center;
-      background-color: #e0e0e0;
+      background-color: white !important;
       position: relative;
     }
     .image-container {
       width: 100%;
-      height: 100%;
+      height: ${imageHeight};  /* Dynamic height based on template */
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: white !important;
     }
     .image-container img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;  /* Show full image without cropping */
+      object-position: center;
+      display: block;
     }
     .timestamp {
       position: absolute;

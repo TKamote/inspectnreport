@@ -18,6 +18,8 @@ export const generateA4Landscape4x2 = (
   headerData: HeaderData,
   includeHeader: boolean
 ): string => {
+  const commonStyles = generateCommonStyles("A4Landscape4x2"); // Pass template name
+
   // Define cards per page (4x2 grid = 8 cards)
   const cardsPerPage = 8;
   const pageCount = Math.ceil(cards.length / cardsPerPage);
@@ -29,11 +31,11 @@ export const generateA4Landscape4x2 = (
 
   // Generate HTML for all pages with page breaks
   let pagesHTML = "";
-    for (let page = 0; pageCount > page; page++) {
-      // Get the cards for this page
-      const startIndex = page * cardsPerPage;
-      const pageCards = cards.slice(startIndex, startIndex + cardsPerPage);
-    
+  for (let page = 0; pageCount > page; page++) {
+    // Get the cards for this page
+    const startIndex = page * cardsPerPage;
+    const pageCards = cards.slice(startIndex, startIndex + cardsPerPage);
+
     // Generate HTML for each card
     const pageCardItems = pageCards
       .map((card, index) => {
@@ -110,7 +112,7 @@ export const generateA4Landscape4x2 = (
       <meta charset="utf-8">
       <title>${headerData.typeOfReport || "Inspection Report"}</title>
       <style>
-        ${generateCommonStyles()}
+        ${commonStyles}
         
         /* Define A4 page size explicitly as LANDSCAPE and remove ALL margins */
         @page {

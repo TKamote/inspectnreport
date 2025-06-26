@@ -6,6 +6,7 @@ import {
   View,
   TouchableOpacity,
   Modal,
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -25,11 +26,7 @@ export default function UserGuideScreen() {
             marginRight: 15,
           }}
         >
-          <Ionicons
-            name="information-circle"
-            size={24}
-            color="#fff"
-          />
+          <Ionicons name="information-circle" size={24} color="#fff" />
         </TouchableOpacity>
       ),
     });
@@ -90,19 +87,19 @@ export default function UserGuideScreen() {
         </Text>
 
         <Text style={styles.text}>
-          • A4 Portrait 2x2: ✅ 4 sections per page, each with a photo and two
+          • A4 Portrait 2x2: ✅ 4 sections per page, each with a photo in portrait mode and two
           customizable text fields. Perfect for focused site visits where
           quality matters over quantity.
         </Text>
 
         <Text style={styles.text}>
           • A4 Portrait 2x3: ✅ 6 sections per page with dual input fields per
-          photo. Ideal for comprehensive daily reports balancing detail and
+          photo in landscape mode. Ideal for comprehensive daily reports balancing detail and
           coverage.
         </Text>
 
         <Text style={styles.text}>
-          • A4 Landscape 3x2: ✅ 6 sections per page in landscape format.
+          • A4 Landscape 3x2: ✅ 6 sections per page in landscape format with photo in landscape mode.
           Excellent for horizontal subjects and field reports requiring wider
           photo display.
         </Text>
@@ -114,15 +111,10 @@ export default function UserGuideScreen() {
         </Text>
 
         <Text style={styles.text}>
-          • A4 Landscape 5x3: ✅ 15 sections per page for detailed audit logs.
+          • A4 Landscape 5x2: ✅ 10 sections per page for detailed audit logs.
           Maximizes the number of items you can document in a single PDF report.
         </Text>
 
-        <Text style={styles.text}>
-          • A4 Portrait 4x6: ✅ 24 sections per page with one text field per
-          photo. Optimized for situations requiring extensive photo
-          documentation with brief identifiers.
-        </Text>
       </View>
 
       <View style={styles.section}>
@@ -145,6 +137,68 @@ export default function UserGuideScreen() {
         </Text>
       </View>
 
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Sample Reports</Text>
+        <Text style={styles.text}>
+          Here are examples of reports created with different templates:
+        </Text>
+
+        <Image
+          source={require("../assets/samples/Landscape3x2.jpeg")}
+          style={{
+            width: "100%",
+            height: 200,
+            marginVertical: 10,
+            borderRadius: 8,
+          }}
+          resizeMode="contain"
+        />
+
+        <Image
+          source={require("../assets/samples/Landscape4x2.jpeg")}
+          style={{
+            width: "100%",
+            height: 200,
+            marginVertical: 10,
+            borderRadius: 8,
+          }}
+          resizeMode="contain"
+        />
+
+        <Image
+          source={require("../assets/samples/Landscape5x2.jpeg")}
+          style={{
+            width: "100%",
+            height: 200,
+            marginVertical: 10,
+            borderRadius: 8,
+          }}
+          resizeMode="contain"
+        />
+
+        <Image
+          source={require("../assets/samples/Portrait2x2.jpeg")}
+          style={{
+            width: "100%",
+            height: 200,
+            marginVertical: 10,
+            borderRadius: 8,
+          }}
+          resizeMode="contain"
+        />
+
+        <Image
+          source={require("../assets/samples/Portrait2x3.jpeg")}
+          style={{
+            width: "100%",
+            height: 200,
+            marginVertical: 10,
+            borderRadius: 8,
+          }}
+          resizeMode="contain"
+        />
+      </View>
+
       <Modal
         animationType="slide"
         transparent={true}
@@ -164,73 +218,140 @@ export default function UserGuideScreen() {
             </View>
 
             <ScrollView style={styles.modalContent}>
-              <Text style={styles.privacyDate}>EFFECTIVE DATE: MAY 10, 2025</Text>
-              
+              <Text style={styles.privacyDate}>
+                EFFECTIVE DATE: MAY 10, 2025
+              </Text>
+
               <Text style={styles.privacySectionTitle}>Introduction</Text>
               <Text style={styles.privacyText}>
-                Welcome to PDF Report Maker. We respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, and protect any information that you provide when using our app.
+                Welcome to PDF Report Maker. We respect your privacy and are
+                committed to protecting your personal data. This Privacy Policy
+                explains how we collect, use, and protect any information that
+                you provide when using our app.
               </Text>
-              
-              <Text style={styles.privacySectionTitle}>Information We Collect</Text>
+
+              <Text style={styles.privacySectionTitle}>
+                Information We Collect
+              </Text>
               <Text style={styles.privacyText}>
-                PDF Report Maker only accesses the following data to provide its core functionality:
+                PDF Report Maker only accesses the following data to provide its
+                core functionality:
               </Text>
               <Text style={styles.privacyListItem}>
-                1. Camera and Photo Library Access: We request access to your device's camera and photo library solely to allow you to take photos or select existing photos for your inspection reports. These photos remain on your device and are only used within the app for generating PDF reports.
+                1. Camera and Photo Library Access: We request access to your
+                device's camera and photo library solely to allow you to take
+                photos or select existing photos for your inspection reports.
+                These photos remain on your device and are only used within the
+                app for generating PDF reports.
               </Text>
               <Text style={styles.privacyListItem}>
-                2. User-Provided Report Data: Any information you enter into the app (such as location details, observations, company information) is used only for generating PDF reports and is not transmitted to our servers.
+                2. User-Provided Report Data: Any information you enter into the
+                app (such as location details, observations, company
+                information) is used only for generating PDF reports and is not
+                transmitted to our servers.
               </Text>
-              
-              <Text style={styles.privacySectionTitle}>How We Use Your Information</Text>
+
+              <Text style={styles.privacySectionTitle}>
+                How We Use Your Information
+              </Text>
               <Text style={styles.privacyText}>
-                All data processing occurs locally on your device. We use your information only to:
+                All data processing occurs locally on your device. We use your
+                information only to:
               </Text>
-              <Text style={styles.privacyListItem}>• Generate PDF reports based on your inputs</Text>
-              <Text style={styles.privacyListItem}>• Allow you to share these reports using your device's native sharing capabilities</Text>
-              
-              <Text style={styles.privacySectionTitle}>Data Storage and Security</Text>
-              <Text style={styles.privacyListItem}>• Local Storage Only: All data (including photos and report content) is stored locally on your device.</Text>
-              <Text style={styles.privacyListItem}>• No External Servers: We do not collect, transmit, or store any of your information on external servers.</Text>
-              <Text style={styles.privacyListItem}>• No Analytics: We do not use any analytics tools to track your app usage.</Text>
-              
-              <Text style={styles.privacySectionTitle}>Sharing Your Information</Text>
+              <Text style={styles.privacyListItem}>
+                • Generate PDF reports based on your inputs
+              </Text>
+              <Text style={styles.privacyListItem}>
+                • Allow you to share these reports using your device's native
+                sharing capabilities
+              </Text>
+
+              <Text style={styles.privacySectionTitle}>
+                Data Storage and Security
+              </Text>
+              <Text style={styles.privacyListItem}>
+                • Local Storage Only: All data (including photos and report
+                content) is stored locally on your device.
+              </Text>
+              <Text style={styles.privacyListItem}>
+                • No External Servers: We do not collect, transmit, or store any
+                of your information on external servers.
+              </Text>
+              <Text style={styles.privacyListItem}>
+                • No Analytics: We do not use any analytics tools to track your
+                app usage.
+              </Text>
+
+              <Text style={styles.privacySectionTitle}>
+                Sharing Your Information
+              </Text>
               <Text style={styles.privacyText}>
-                We do not share your personal information with third parties. When you choose to share a report, you are using your device's native sharing functionality, and we have no control over or access to that process.
+                We do not share your personal information with third parties.
+                When you choose to share a report, you are using your device's
+                native sharing functionality, and we have no control over or
+                access to that process.
               </Text>
-              
+
               <Text style={styles.privacySectionTitle}>Children's Privacy</Text>
               <Text style={styles.privacyText}>
-                Our app is not intended for use by children under 13 years of age. We do not knowingly collect personal information from children under 13.
+                Our app is not intended for use by children under 13 years of
+                age. We do not knowingly collect personal information from
+                children under 13.
               </Text>
-              
-              <Text style={styles.privacySectionTitle}>Changes to This Privacy Policy</Text>
+
+              <Text style={styles.privacySectionTitle}>
+                Changes to This Privacy Policy
+              </Text>
               <Text style={styles.privacyText}>
-                We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Effective Date" at the top.
+                We may update our Privacy Policy from time to time. We will
+                notify you of any changes by posting the new Privacy Policy on
+                this page and updating the "Effective Date" at the top.
               </Text>
-              
+
               <Text style={styles.privacySectionTitle}>Contact Us</Text>
               <Text style={styles.privacyText}>
-                If you have any questions about this Privacy Policy, please contact us at:
+                If you have any questions about this Privacy Policy, please
+                contact us at:
               </Text>
-              <Text style={styles.privacyListItem}>• Email: admin@PDFReportMaker.site</Text>
-              
+              <Text style={styles.privacyListItem}>
+                • Email: admin@PDFReportMaker.site
+              </Text>
+
               <Text style={styles.privacySectionTitle}>Your Rights</Text>
               <Text style={styles.privacyText}>
-                Depending on your location, you may have certain rights regarding your personal information, such as the right to access, correct, or delete your data. Since all data is stored locally on your device, you can exercise these rights directly by managing your data within the app or through your device's settings.
+                Depending on your location, you may have certain rights
+                regarding your personal information, such as the right to
+                access, correct, or delete your data. Since all data is stored
+                locally on your device, you can exercise these rights directly
+                by managing your data within the app or through your device's
+                settings.
               </Text>
-              
-              <Text style={styles.privacySectionTitle}>California Privacy Rights</Text>
+
+              <Text style={styles.privacySectionTitle}>
+                California Privacy Rights
+              </Text>
               <Text style={styles.privacyText}>
-                California residents have the right to request information regarding the disclosure of personal information to third parties for direct marketing purposes. As stated earlier, we do not share your personal information with third parties for marketing purposes.
+                California residents have the right to request information
+                regarding the disclosure of personal information to third
+                parties for direct marketing purposes. As stated earlier, we do
+                not share your personal information with third parties for
+                marketing purposes.
               </Text>
-              
-              <Text style={styles.privacySectionTitle}>International Data Transfers</Text>
+
+              <Text style={styles.privacySectionTitle}>
+                International Data Transfers
+              </Text>
               <Text style={styles.privacyText}>
-                Since all data remains on your device, no international data transfers occur.
+                Since all data remains on your device, no international data
+                transfers occur.
               </Text>
-              
-              <Text style={[styles.privacyText, {marginTop: 15, marginBottom: 20}]}>
+
+              <Text
+                style={[
+                  styles.privacyText,
+                  { marginTop: 15, marginBottom: 20 },
+                ]}
+              >
                 By using our app, you consent to our Privacy Policy.
               </Text>
             </ScrollView>

@@ -18,6 +18,8 @@ export const generateA4Landscape3x2 = (
   headerData: HeaderData,
   includeHeader: boolean
 ): string => {
+  const commonStyles = generateCommonStyles("A4Landscape3x2"); // Pass template name
+
   // Define cards per page (3x2 grid = 6 cards)
   const cardsPerPage = 6;
   const pageCount = Math.max(1, Math.ceil(cards.length / cardsPerPage));
@@ -110,7 +112,7 @@ export const generateA4Landscape3x2 = (
       <meta charset="utf-8">
       <title>${headerData.typeOfReport || "Inspection Report"}</title>
       <style>
-        ${generateCommonStyles()}
+        ${commonStyles}
         
         /* Define A4 page size explicitly as LANDSCAPE and remove ALL margins */
         @page {

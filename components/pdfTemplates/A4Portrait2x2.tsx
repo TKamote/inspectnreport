@@ -18,6 +18,8 @@ export const generateA4Portrait2x2 = (
   headerData: HeaderData,
   includeHeader: boolean
 ): string => {
+  const commonStyles = generateCommonStyles("A4Portrait2x2"); // Pass template name
+
   // Define cards per page (2x2 grid = 4 cards)
   const cardsPerPage = 4;
   const pageCount = Math.ceil(cards.length / cardsPerPage);
@@ -114,7 +116,7 @@ export const generateA4Portrait2x2 = (
       <meta charset="utf-8">
       <title>${headerData.typeOfReport || "Inspection Report"}</title>
       <style>
-        ${generateCommonStyles()}
+        ${commonStyles}
         
         /* Define A4 page size explicitly and remove ALL margins */
         @page {

@@ -7,7 +7,7 @@ A mobile app for technicians to easily create professional PDF reports with phot
 - Create professional PDF reports directly from your mobile device
 - Take photos or select from gallery and add them to your reports
 - Add location information and observations for each photo
-- Choose from multiple PDF layouts for different reporting needs
+- Choose from simplified PDF layouts for better usability
 - Include company information and report details
 - Generate and share PDF reports instantly
 
@@ -21,19 +21,17 @@ A mobile app for technicians to easily create professional PDF reports with phot
 ## Installation
 
 1. Clone the repository
-
-````bash
+```bash
 git clone https://github.com/yourusername/pdfreportmaker.git
-
+```
 
 2. Install dependencies
 ```bash
 cd pdfreportmaker
 npm install
-````
+```
 
 3. Run the app
-
 ```bash
 npx expo start
 ```
@@ -62,7 +60,3 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Website: [https://pdfreportmaker.site](https://pdfreportmaker.site)
 Email: [contact@pdfreportmaker.site](mailto:contact@pdfreportmaker.site)
-
-```
-
-```

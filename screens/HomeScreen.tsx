@@ -66,7 +66,7 @@ export default function HomeScreen() {
       >
         <Text style={styles.templateTitle}>A4 Portrait 2x2</Text>
         <Text style={styles.templateDescription}>
-          4 sections per page with 2 fields input and 1 photo on each
+          4 sections per page, each with 2 field inputs and a photo
         </Text>
       </TouchableOpacity>
 
@@ -76,7 +76,7 @@ export default function HomeScreen() {
       >
         <Text style={styles.templateTitle}>A4 Portrait 2x3</Text>
         <Text style={styles.templateDescription}>
-          6 sections per page with 2 fields input and 1 photo on each
+          6 sections per page, each with 2 field inputs and a photo
         </Text>
       </TouchableOpacity>
 
@@ -86,7 +86,7 @@ export default function HomeScreen() {
       >
         <Text style={styles.templateTitle}>A4 Landscape 3x2</Text>
         <Text style={styles.templateDescription}>
-          6 sections per page with 2 fields input and 1 photo on each
+          6 sections per page, each with 2 field inputs and a photo
         </Text>
       </TouchableOpacity>
 
@@ -96,29 +96,20 @@ export default function HomeScreen() {
       >
         <Text style={styles.templateTitle}>A4 Landscape 4x2</Text>
         <Text style={styles.templateDescription}>
-          8 sections per page with 2 fields input and 1 photo on each
+          8 sections per page, each with 2 field inputs and a photo
         </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.templateOption}
-        onPress={() => navigateToTemplate("A4Landscape5x3")}
+        onPress={() => navigateToTemplate("A4Landscape5x2")}
       >
-        <Text style={styles.templateTitle}>A4 Landscape 5x3</Text>
+        <Text style={styles.templateTitle}>A4 Landscape 5x2</Text>
         <Text style={styles.templateDescription}>
-          15 sections per page with 2 fields input and 1 photo on each
+          10 sections per page, each with 2 field inputs and a photo
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.templateOption}
-        onPress={() => navigateToTemplate("A4Portrait4x6")}
-      >
-        <Text style={styles.templateTitle}>A4 Portrait 4x6</Text>
-        <Text style={styles.templateDescription}>
-          24 sections per page with 1 field input and 1 photo on each
-        </Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -130,7 +121,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   description: {
-    fontSize: 16,
+    fontSize: 18,
     color: COLORS.MIDNIGHT,
     marginBottom: 20,
     textAlign: "center",
@@ -144,13 +135,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   templateTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "bold",
     color: COLORS.MIDNIGHT,
     marginBottom: 5,
   },
   templateDescription: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.SPACE,
   },
 });

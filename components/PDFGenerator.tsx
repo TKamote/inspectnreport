@@ -12,8 +12,7 @@ import { generateA4Portrait2x2 } from "./pdfTemplates/A4Portrait2x2";
 import { generateA4Portrait2x3 } from "./pdfTemplates/A4Portrait2x3";
 import { generateA4Landscape3x2 } from "./pdfTemplates/A4Landscape3x2";
 import { generateA4Landscape4x2 } from "./pdfTemplates/A4Landscape4x2";
-import { generateA4Landscape5x3 } from "./pdfTemplates/A4Landscape5x3";
-import { generateA4Portrait4x6 } from "./pdfTemplates/A4Portrait4x6";
+import { generateA4Landscape5x2 } from "./pdfTemplates/A4Landscape5x2";
 
 // Define progress types
 export type ProgressStep =
@@ -33,7 +32,7 @@ export type ProgressInfo = {
 };
 
 // Helper function to pad numbers for timestamp
-const pad = (num: number): string => num.toString().padStart(2, '0');
+const pad = (num: number): string => num.toString().padStart(2, "0");
 
 // Compress image and convert to base64
 const compressAndConvertToBase64 = async (uri: string): Promise<string> => {
@@ -120,9 +119,7 @@ const generateHTMLByTemplate = (options: PDFGenerationOptions): string => {
     case "A4Landscape4x2":
       return generateA4Landscape4x2(cards, headerData, includeHeader);
     case "A4Landscape5x3":
-      return generateA4Landscape5x3(cards, headerData, includeHeader);
-    case "A4Portrait4x6":
-      return generateA4Portrait4x6(cards, headerData, includeHeader);
+      return generateA4Landscape5x2(cards, headerData, includeHeader);
     default:
       return generateA4Portrait2x2(cards, headerData, includeHeader);
   }
@@ -134,20 +131,29 @@ export const generatePDF = async (
   onProgress?: (info: ProgressInfo) => void
 ): Promise<boolean> => {
   try {
-    if (onProgress) onProgress({ step: "init", message: "Starting PDF generation..." });
+    if (onProgress)
+      onProgress({ step: "init", message: "Starting PDF generation..." });
 
-    const imagesToProcessCount = options.cards.filter((card) => card.photo).length;
+    const imagesToProcessCount = options.cards.filter(
+      (card) => card.photo
+    ).length;
     if (onProgress) {
       onProgress({
         step: "compressing",
-        message: imagesToProcessCount > 0 ? "Processing images..." : "No images to process.",
+        message:
+          imagesToProcessCount > 0
+            ? "Processing images..."
+            : "No images to process.",
         progress: 0,
         total: imagesToProcessCount,
         current: 0,
       });
     }
 
-    const processedCards = await processCardsWithCompressedImages(options.cards, onProgress);
+    const processedCards = await processCardsWithCompressedImages(
+      options.cards,
+      onProgress
+    );
 
     if (imagesToProcessCount > 0 && onProgress) {
       // Ensure compressing shows 100% if images were processed
@@ -160,10 +166,15 @@ export const generatePDF = async (
       });
     }
 
-    if (onProgress) onProgress({ step: "generating", message: "Generating PDF content..." });
-    const htmlContent = generateHTMLByTemplate({ ...options, cards: processedCards });
+    if (onProgress)
+      onProgress({ step: "generating", message: "Generating PDF content..." });
+    const htmlContent = generateHTMLByTemplate({
+      ...options,
+      cards: processedCards,
+    });
 
-    if (onProgress) onProgress({ step: "creating", message: "Creating PDF file..." });
+    if (onProgress)
+      onProgress({ step: "creating", message: "Creating PDF file..." });
     const isLandscape = options.template.includes("Landscape");
     const dimensions = isLandscape
       ? { width: 841.89, height: 595.28 }
@@ -177,7 +188,9 @@ export const generatePDF = async (
 
     // --- FILENAME GENERATION AND MOVING ---
     const now = new Date();
-    const timestamp = `${pad(now.getFullYear())}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    const timestamp = `${pad(now.getFullYear())}${pad(now.getMonth() + 1)}${pad(
+      now.getDate()
+    )}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
     const fileName = `PDF_${timestamp}.pdf`;
     const newFilePath = `${FileSystem.documentDirectory}${fileName}`; // Ensure .pdf extension
 
@@ -189,27 +202,31 @@ export const generatePDF = async (
     });
     // --- END FILENAME GENERATION AND MOVING ---
 
-    if (onProgress) onProgress({ step: "sharing", message: "Preparing to share PDF..." });
+    if (onProgress)
+      onProgress({ step: "sharing", message: "Preparing to share PDF..." });
 
     const shareOptions: Sharing.SharingOptions = {
       mimeType: "application/pdf",
-      dialogTitle: Platform.OS === 'ios' ? fileName : "Save or Share PDF Report", // On iOS, this can be a suggestion
+      dialogTitle:
+        Platform.OS === "ios" ? fileName : "Save or Share PDF Report", // On iOS, this can be a suggestion
     };
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios") {
       shareOptions.UTI = ".pdf";
     }
 
     // Share the NEWLY NAMED file
     await Sharing.shareAsync(newFilePath, shareOptions);
 
-    if (onProgress) onProgress({ step: "complete", message: "PDF shared successfully!" });
+    if (onProgress)
+      onProgress({ step: "complete", message: "PDF shared successfully!" });
     return true;
-
   } catch (error) {
     if (onProgress) {
       onProgress({
         step: "complete",
-        message: `Error: ${error instanceof Error ? error.message : "Failed to generate PDF"}`,
+        message: `Error: ${
+          error instanceof Error ? error.message : "Failed to generate PDF"
+        }`,
       });
     }
     return false;
@@ -221,13 +238,15 @@ export const generateTestPDF = async (
   onProgress?: (info: ProgressInfo) => void
 ): Promise<boolean> => {
   try {
-    if (onProgress) onProgress({ step: "init", message: "Creating test PDF..." });
+    if (onProgress)
+      onProgress({ step: "init", message: "Creating test PDF..." });
 
     const minimumHtml = `
       <!DOCTYPE html><html><head><meta charset="utf-8"><title>Test PDF</title></head>
       <body><h1>Test PDF</h1><p>This is a test PDF with minimal content.</p></body></html>`;
 
-    if (onProgress) onProgress({ step: "creating", message: "Creating PDF file..." });
+    if (onProgress)
+      onProgress({ step: "creating", message: "Creating PDF file..." });
 
     const { uri: temporaryPdfUri } = await Print.printToFileAsync({
       html: minimumHtml,
@@ -238,7 +257,9 @@ export const generateTestPDF = async (
     const now = new Date();
     // Adding Year and Seconds for more uniqueness if tests are run rapidly
     // MODIFIED TIMESTAMP: MMDD_HHMM (no year)
-    const timestamp = `${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+    const timestamp = `${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(
+      now.getHours()
+    )}${pad(now.getMinutes())}`;
     // For generatePDF:
     const fileName = `PDF_${timestamp}.pdf`;
     const newFilePath = `${FileSystem.documentDirectory}${fileName}`; // Ensure .pdf extension
@@ -249,28 +270,38 @@ export const generateTestPDF = async (
     });
     // --- END FILENAME GENERATION AND MOVING ---
 
-    if (onProgress) onProgress({ step: "sharing", message: "Preparing to share test PDF..." });
+    if (onProgress)
+      onProgress({
+        step: "sharing",
+        message: "Preparing to share test PDF...",
+      });
 
     const shareOptions: Sharing.SharingOptions = {
       mimeType: "application/pdf",
-      dialogTitle: Platform.OS === 'ios' ? fileName : "Save or Share Test PDF",
+      dialogTitle: Platform.OS === "ios" ? fileName : "Save or Share Test PDF",
     };
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios") {
       shareOptions.UTI = ".pdf";
     }
 
     await Sharing.shareAsync(newFilePath, shareOptions);
 
-    if (onProgress) onProgress({ step: "complete", message: "Test PDF shared successfully!" });
+    if (onProgress)
+      onProgress({
+        step: "complete",
+        message: "Test PDF shared successfully!",
+      });
     return true;
-
   } catch (error) {
     if (onProgress) {
       onProgress({
         step: "complete",
-        message: `Error: ${error instanceof Error ? error.message : "Failed to create test PDF"}`,
+        message: `Error: ${
+          error instanceof Error ? error.message : "Failed to create test PDF"
+        }`,
       });
     }
     return false;
   }
 };
+

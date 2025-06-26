@@ -27,15 +27,31 @@ const getTemplateDisplayName = (templateCode: string): string => {
     A4Portrait2x3: "A4 Portrait: 2-Col x 3-Row Grid",
     A4Landscape3x2: "A4 Landscape: 3-Col x 2-Row Grid",
     A4Landscape4x2: "A4 Landscape: 4-Col x 2-Row Grid",
-    A4Landscape5x3: "A4 Landscape: 5-Col x 3-Row Grid",
-    A4Portrait4x6: "A4 Portrait: 4-Col x 6-Row Grid",
+    A4Landscape5x3: "A4 Landscape: 5-Col x 2-Row Grid",
   };
 
   return displayNames[templateCode] || templateCode;
 };
 
+// Add this function at the top of your component, after the imports
+const getImageDimensions = (template: string) => {
+  if (template === "A4Landscape5x2") {
+    return { width: 200, height: 267 }; // 3:4 ratio for portrait photos
+  } else if (template.includes("Portrait")) {
+    return { width: 200, height: 267 }; // Default 3:4 ratio for portrait templates
+  } else {
+    return { width: 200, height: 150 }; // 4:3 ratio for landscape templates
+  }
+};
+
 export default function InputScreen({ route }: { route: any }) {
   const { template } = route.params;
+
+  // Get dynamic dimensions for the selected template
+  const imageDimensions = getImageDimensions(template);
+
+  // Create styles dynamically based on the image dimensions
+  const styles = createStyles(imageDimensions);
 
   const [headerData, setHeaderData] = useState<HeaderData>({
     company: "",
@@ -91,12 +107,11 @@ export default function InputScreen({ route }: { route: any }) {
           onPress: async () => {
             const result = await ImagePicker.launchCameraAsync({
               mediaTypes: "images",
-              allowsEditing: true,
+              allowsEditing: false,
               quality: 1,
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
-              // For camera photos, keep the timestamp
               const timestamp = new Date().toLocaleString(undefined, {
                 year: "numeric",
                 month: "numeric",
@@ -107,7 +122,7 @@ export default function InputScreen({ route }: { route: any }) {
               updateCard(index, {
                 ...cards[index],
                 photo: result.assets[0].uri,
-                timestamp: timestamp, // Include timestamp for camera photos
+                timestamp: timestamp,
               });
             }
           },
@@ -117,16 +132,15 @@ export default function InputScreen({ route }: { route: any }) {
           onPress: async () => {
             const result = await ImagePicker.launchImageLibraryAsync({
               mediaTypes: "images",
-              allowsEditing: true,
+              allowsEditing: false,
               quality: 1,
             });
 
             if (!result.canceled && result.assets && result.assets.length > 0) {
-              // For gallery photos, don't add a timestamp
               updateCard(index, {
                 ...cards[index],
                 photo: result.assets[0].uri,
-                timestamp: null, // No timestamp for gallery photos
+                timestamp: null,
               });
             }
           },
@@ -179,7 +193,13 @@ export default function InputScreen({ route }: { route: any }) {
     generatePDF(
       {
         cards,
-        headerData: { company: "", createdBy: "", reportFor: "", typeOfReport: "", date: "" },
+        headerData: {
+          company: "",
+          createdBy: "",
+          reportFor: "",
+          typeOfReport: "",
+          date: "",
+        },
         template: template as PDFTemplate,
         includeHeader: false,
       },
@@ -400,12 +420,16 @@ export default function InputScreen({ route }: { route: any }) {
               </View>
 
               <Text style={styles.modalText}>
-                Would you like to include a header with company and report information?
+                Would you like to include a header with company and report
+                information?
               </Text>
 
               <View style={styles.modalButtonContainer}>
                 <TouchableOpacity
-                  style={[styles.modalChoiceButton, { backgroundColor: COLORS.SPACE }]}
+                  style={[
+                    styles.modalChoiceButton,
+                    { backgroundColor: COLORS.SPACE },
+                  ]}
                   onPress={() => generateWithoutHeader()}
                 >
                   <Text style={styles.modalButtonText}>No</Text>
@@ -447,286 +471,288 @@ export default function InputScreen({ route }: { route: any }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#fff",
-    padding: 20,
-    fontFamily: FONTS.FAMILY,
-  },
-  title: {
-    fontSize: 14,
-    fontWeight: FONTS.WEIGHTS.BOLD,
-    marginBottom: 20,
-    textAlign: "center",
-    color: COLORS.MIDNIGHT,
-  },
-  infoText: {
-    color: COLORS.MIDNIGHT,
-    fontSize: 14,
-    textAlign: "center",
-    marginBottom: 15,
-    fontStyle: "italic",
-  },
-  cardContainer: {
-    marginBottom: 20,
-    padding: 15,
-    borderWidth: 1,
-    borderColor: COLORS.BORDER,
-    borderRadius: 5,
-    backgroundColor: "#f9f9f9",
-  },
-  input: {
-    width: "100%",
-    height: 40,
-    borderWidth: 1,
-    borderColor: COLORS.BORDER,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-  },
-  textArea: {
-    height: 70,
-  },
-  photoButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: COLORS.SPACE,
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
-    width: 200, // Match the image preview width
-    alignSelf: "center", // Center the button horizontally
-  },
-  photoButtonText: {
-    color: COLORS.WHITE,
-    fontSize: 14,
-    fontWeight: FONTS.WEIGHTS.BOLD,
-    marginLeft: 8,
-  },
-  photoIcon: {
-    marginRight: 5,
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 10,
-  },
-  imagePlaceholder: {
-    width: 200,
-    height: 200,
-    marginTop: 10,
-    borderRadius: 10,
-    backgroundColor: "#e0e0e0",
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "center",
-  },
-  imagePlaceholderText: {
-    color: "#888",
-    fontSize: 14,
-  },
-  timestamp: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    textAlign: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
-    color: COLORS.WHITE,
-    fontSize: 12,
-    paddingVertical: 2,
-    zIndex: 100, // Ensure the timestamp is on top
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-  },
-  photoContainer: {
-    position: "relative", // Enable absolute positioning for child elements
-    width: 200,
-    height: 200,
-    alignSelf: "center",
-  },
-  cardFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 15,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-  },
-  cardNumber: {
-    fontSize: 14,
-    color: "#999",
-    fontWeight: FONTS.WEIGHTS.MEDIUM,
-  },
-  deleteButton: {
-    padding: 5,
-  },
-  addButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: COLORS.SPACE,
-    padding: 12,
-    borderRadius: 5,
-    alignSelf: "center",
-    marginBottom: 10,
-    width: "100%", // Match the card width
-  },
-  addButtonText: {
-    color: COLORS.WHITE,
-    fontSize: 14,
-    fontWeight: FONTS.WEIGHTS.BOLD,
-    marginLeft: 8,
-  },
-  addIcon: {
-    marginRight: 5,
-  },
-  pdfButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: COLORS.RED,
-    padding: 12,
-    borderRadius: 5,
-    alignSelf: "center",
-    marginBottom: 20, // Add margin bottom instead of top
-    width: "100%",
-  },
-  disabledButton: {
-    backgroundColor: COLORS.BORDER,
-  },
-  pdfDisabledButton: {
-    backgroundColor: "rgba(227, 6, 19, 0.3)", // Faded red
-  },
-  pdfButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-  pdfIcon: {
-    marginRight: 5,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-start", // Changed from center to flex-start
-  },
-  modalScrollContent: {
-    flexGrow: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    width: "100%",
-    paddingTop: 50, // Reduced from 50 to 30
-    paddingBottom: 5, // Reduced from 30 to 20
-  },
-  modalContent: {
-    width: "85%",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 15, // Reduced from 20 to 15
-    maxHeight: "85%", // Increased from 80% to 85%
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-    width: "100%",
-  },
-  closeButton: {
-    padding: 5,
-  },
-  modalTitle: {
-    fontSize: 16, // Reduced from 18 to 16
-    fontWeight: "bold",
-    marginBottom: 5, // Reduced from 20 to 5 (because we have header with spacing now)
-  },
-  modalButton: {
-    backgroundColor: "#E30613",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 5,
-    width: "100%",
-  },
-  modalButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  modalBackground: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingContainer: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    alignItems: "center",
-    width: "80%",
-  },
-  loadingText: {
-    marginTop: 15,
-    fontSize: 16,
-    textAlign: "center",
-  },
-  progressBar: {
-    height: 6,
-    width: "100%",
-    backgroundColor: "#f0f0f0",
-    borderRadius: 3,
-    marginTop: 15,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    backgroundColor: COLORS.RED,
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalView: {
-    width: "85%",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
+// Dynamically create styles based on image dimensions
+const createStyles = (imageDimensions: { width: number; height: number }) =>
+  StyleSheet.create({
+    container: {
+      flexGrow: 1,
+      backgroundColor: "#fff",
+      padding: 20,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center",
-    color: COLORS.MIDNIGHT,
-    fontSize: 16,
-  },
-  modalButtonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    marginTop: 15,
-    paddingHorizontal: 10,
-  },
-  modalChoiceButton: {
-    backgroundColor: COLORS.RED,
-    padding: 5, // 5px padding on all sides
-    borderRadius: 5,
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: 80, // Ensure minimum width
-  },
-});
+    title: {
+      fontSize: 14,
+      fontWeight: FONTS.WEIGHTS.BOLD,
+      marginBottom: 20,
+      textAlign: "center",
+      color: COLORS.MIDNIGHT,
+    },
+    infoText: {
+      color: COLORS.MIDNIGHT,
+      fontSize: 14,
+      textAlign: "center",
+      marginBottom: 15,
+      fontStyle: "italic",
+    },
+    cardContainer: {
+      marginBottom: 20,
+      padding: 15,
+      borderWidth: 1,
+      borderColor: COLORS.BORDER,
+      borderRadius: 5,
+      backgroundColor: "#f9f9f9",
+    },
+    input: {
+      width: "100%",
+      height: 40,
+      borderWidth: 1,
+      borderColor: COLORS.BORDER,
+      borderRadius: 5,
+      paddingHorizontal: 10,
+      marginBottom: 10,
+    },
+    textArea: {
+      height: 70,
+    },
+    photoButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: COLORS.SPACE,
+      padding: 10,
+      borderRadius: 5,
+      marginTop: 10,
+      width: imageDimensions.width,
+      alignSelf: "center",
+    },
+    photoButtonText: {
+      color: COLORS.WHITE,
+      fontSize: 14,
+      fontWeight: FONTS.WEIGHTS.BOLD,
+      marginLeft: 8,
+    },
+    photoIcon: {
+      marginRight: 5,
+    },
+    image: {
+      width: "100%",
+      height: "100%",
+      borderRadius: 10,
+      resizeMode: "cover",
+    },
+    imagePlaceholder: {
+      width: imageDimensions.width,
+      height: imageDimensions.height,
+      marginTop: 10,
+      borderRadius: 10,
+      backgroundColor: "#e0e0e0",
+      justifyContent: "center",
+      alignItems: "center",
+      alignSelf: "center",
+    },
+    imagePlaceholderText: {
+      color: "#888",
+      fontSize: 14,
+    },
+    timestamp: {
+      position: "absolute",
+      bottom: 0,
+      width: "100%",
+      textAlign: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      color: COLORS.WHITE,
+      fontSize: 12,
+      paddingVertical: 2,
+      zIndex: 100,
+      borderBottomLeftRadius: 10,
+      borderBottomRightRadius: 10,
+    },
+    photoContainer: {
+      position: "relative",
+      width: imageDimensions.width,
+      height: imageDimensions.height,
+      alignSelf: "center",
+    },
+    cardFooter: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: 15,
+      paddingTop: 10,
+      borderTopWidth: 1,
+      borderTopColor: "#eee",
+    },
+    cardNumber: {
+      fontSize: 14,
+      color: "#999",
+      fontWeight: FONTS.WEIGHTS.MEDIUM,
+    },
+    deleteButton: {
+      padding: 5,
+    },
+    addButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: COLORS.SPACE,
+      padding: 12,
+      borderRadius: 5,
+      alignSelf: "center",
+      marginBottom: 10,
+      width: "100%",
+    },
+    addButtonText: {
+      color: COLORS.WHITE,
+      fontSize: 14,
+      fontWeight: FONTS.WEIGHTS.BOLD,
+      marginLeft: 8,
+    },
+    addIcon: {
+      marginRight: 5,
+    },
+    pdfButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: COLORS.RED,
+      padding: 12,
+      borderRadius: 5,
+      alignSelf: "center",
+      marginBottom: 20,
+      width: "100%",
+    },
+    disabledButton: {
+      backgroundColor: COLORS.BORDER,
+    },
+    pdfDisabledButton: {
+      backgroundColor: "rgba(227, 6, 19, 0.3)",
+    },
+    pdfButtonText: {
+      color: "#fff",
+      fontSize: 14,
+      fontWeight: "bold",
+      marginLeft: 10,
+    },
+    pdfIcon: {
+      marginRight: 5,
+    },
+    modalContainer: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      justifyContent: "flex-start",
+    },
+    modalScrollContent: {
+      flexGrow: 1,
+      justifyContent: "flex-start",
+      alignItems: "center",
+      width: "100%",
+      paddingTop: 50,
+      paddingBottom: 5,
+    },
+    modalContent: {
+      width: "85%",
+      backgroundColor: "#fff",
+      borderRadius: 10,
+      padding: 15,
+      maxHeight: "85%",
+    },
+    modalHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 10,
+      width: "100%",
+    },
+    closeButton: {
+      padding: 5,
+    },
+    modalTitle: {
+      fontSize: 16,
+      fontWeight: "bold",
+      marginBottom: 5,
+    },
+    modalButton: {
+      backgroundColor: "#E30613",
+      padding: 15,
+      borderRadius: 5,
+      alignItems: "center",
+      marginTop: 5,
+      width: "100%",
+    },
+    modalButtonText: {
+      color: "#fff",
+      fontSize: 16,
+      fontWeight: "bold",
+    },
+    modalBackground: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    loadingContainer: {
+      backgroundColor: "white",
+      padding: 20,
+      borderRadius: 10,
+      alignItems: "center",
+      width: "80%",
+    },
+    loadingText: {
+      marginTop: 15,
+      fontSize: 16,
+      textAlign: "center",
+    },
+    progressBar: {
+      height: 6,
+      width: "100%",
+      backgroundColor: "#f0f0f0",
+      borderRadius: 3,
+      marginTop: 15,
+      overflow: "hidden",
+    },
+    progressFill: {
+      height: "100%",
+      backgroundColor: COLORS.RED,
+    },
+    centeredView: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalView: {
+      width: "85%",
+      backgroundColor: "#fff",
+      borderRadius: 10,
+      padding: 20,
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+    modalText: {
+      marginBottom: 15,
+      textAlign: "center",
+      color: COLORS.MIDNIGHT,
+      fontSize: 16,
+    },
+    modalButtonContainer: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      width: "100%",
+      marginTop: 15,
+      paddingHorizontal: 10,
+    },
+    modalChoiceButton: {
+      backgroundColor: COLORS.RED,
+      padding: 5,
+      borderRadius: 5,
+      alignItems: "center",
+      justifyContent: "center",
+      minWidth: 80,
+    },
+  });

@@ -13,13 +13,15 @@ function truncateText(text: string, maxLength: number = 100): string {
   return text.substring(0, maxLength) + "...";
 }
 
-export const generateA4Landscape5x3 = (
+export const generateA4Landscape5x2 = (
   cards: CardData[],
   headerData: HeaderData,
   includeHeader: boolean
 ): string => {
-  // Define cards per page (5x3 grid = 15 cards)
-  const cardsPerPage = 15;
+  const commonStyles = generateCommonStyles("A4Landscape5x2");
+
+  // Define cards per page (5x2 grid = 10 cards per page)
+  const cardsPerPage = 10;
   const pageCount = Math.ceil(cards.length / cardsPerPage);
 
   // Generate the header HTML once to reuse
@@ -65,7 +67,7 @@ export const generateA4Landscape5x3 = (
             <div class="observations-title">Observations:</div>
             <div class="observations-content">${truncateText(
               card.observations || "No observations",
-              100 // Very short text limit for 5-column layout
+              100 // Short text limit for 5-column layout
             )}</div>
           </div>
         </div>
@@ -109,7 +111,7 @@ export const generateA4Landscape5x3 = (
       <meta charset="utf-8">
       <title>${headerData.typeOfReport || "Inspection Report"}</title>
       <style>
-        ${generateCommonStyles()}
+        ${commonStyles}
         
         /* Define A4 page size explicitly as LANDSCAPE and remove ALL margins */
         @page {
@@ -146,19 +148,13 @@ export const generateA4Landscape5x3 = (
         .page {
           position: relative;
           width: 297mm;
-          height: 208mm; /* Reduced from 210mm to 208mm to prevent extra page */
+          height: 210mm;
           margin: 0;
           padding: 0;
           box-sizing: border-box;
           overflow: hidden;
           page-break-after: avoid;
           page-break-inside: avoid;
-        }
-
-        /* Fix for the last page specifically */
-        .page:last-child {
-          page-break-after: avoid !important;
-          page-break-inside: avoid !important;
         }
 
         /* Header fixed at top of page */
@@ -174,12 +170,12 @@ export const generateA4Landscape5x3 = (
         /* Page content positioning - adjust spacing with explicit height */
         .page-content {
           position: absolute;
-          top: 20mm; /* Moved up to allow more space for 3 rows */
+          top: 20mm;
           bottom: 15mm;
           left: 0;
           right: 0;
           width: 95%;
-          height: 173mm; /* Increased height for 3 rows */
+          height: 173mm;
           margin: 0 auto;
           overflow: visible;
           padding-top: 3mm;
@@ -197,48 +193,31 @@ export const generateA4Landscape5x3 = (
           background-color: white;
         }
 
-        /* Improved header layout */
-        .header-row {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: space-between;
-          margin-bottom: 3px;
-        }
-
-        /* Fix the date field visibility */
-        .header-value {
-          margin-right: 12px;
-          font-size: 9px;
-          max-width: 180px;
-          white-space: normal;
-        }
-
-        /* Date section - ensure visibility */
-        .date-section {
-          display: flex;
-          align-items: center;
-          min-width: 120px;
-          max-width: 180px;
+        /* Grid container for 5x2 layout */
+        .grid-container {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr); /* 5 equal columns */
+          grid-template-rows: repeat(2, auto); /* 2 auto-sized rows */
+          gap: 8px;
+          margin-bottom: 2px;
+          width: 100%;
           margin-left: auto;
+          margin-right: auto;
         }
 
-        /* Report title - with margins and padding removed */
-        .report-title {
-          font-size: 14px;
-          font-weight: bold;
-          margin-top: 0;
-          margin-bottom: 0;
-          padding-top: 0;
+        /* Card styling for 5x2 layout */
+        .card {
+          page-break-inside: avoid;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          margin-bottom: 2px;
+          max-height: 70mm; /* Adjusted for 5x2 layout */
+          border: 1px solid #ddd;
+          border-radius: 3px;
         }
-        
-        /* Header labels - reduced to 9px */
-        .header-label {
-          font-weight: bold;
-          margin-right: 4px;
-          font-size: 9px;
-        }
-        
-        /* Ensure card headers are always visible */
+
+        /* Card header (location and card number) */
         .card-header {
           background-color: #007BFF;
           color: #000;
@@ -248,35 +227,25 @@ export const generateA4Landscape5x3 = (
           justify-content: space-between;
           align-items: center;
           font-size: 8px;
+          height: 6mm; /* Reduced height */
         }
 
-        /* Ensure all card header content is visible */
-        .card-location, .card-number {
-          display: inline-block; 
+        /* Image container with 3:4 aspect ratio */
+        .image-container {
           position: relative;
-          z-index: 2;
-          opacity: 1 !important;
+          width: 100%;
+          padding-top: 75%; /* 3:4 ratio = 75% */
+          overflow: hidden;
         }
 
-        /* Fix for first row cards to ensure header visibility */
-        .grid-container > .card:nth-child(-n+5) .card-header {
-          position: relative;
-          z-index: 15;
+        /* Observations section */
+        .card-observations {
+          padding: 4px 6px 3px;
+          max-height: 12mm; /* Increased height */
+          overflow: hidden;
+          background-color: #f9f9f9;
         }
 
-        /* Ensure second row cards are fully visible */
-        .grid-container > .card:nth-child(n+6):nth-child(-n+10) {
-          position: relative;
-          z-index: 5;
-        }
-
-        /* Ensure third row cards are fully visible */
-        .grid-container > .card:nth-child(n+11) {
-          position: relative;
-          z-index: 4;
-        }
-        
-        /* Other elements should keep consistent proportions */
         .observations-title {
           font-weight: bold;
           margin-bottom: 1px;
@@ -284,7 +253,7 @@ export const generateA4Landscape5x3 = (
           font-size: 8px;
           display: inline-block;
         }
-        
+
         .observations-content {
           white-space: pre-wrap;
           font-size: 7px;
@@ -295,135 +264,6 @@ export const generateA4Landscape5x3 = (
           -webkit-line-clamp: 4;
           -webkit-box-orient: vertical;
           color: #333;
-        }
-        
-        /* A4 Landscape 5x3 specific styles */
-        .grid-container {
-          display: grid;
-          grid-template-columns: repeat(5, 1fr); /* 5 equal columns */
-          grid-template-rows: repeat(3, auto); /* 3 auto-sized rows */
-          gap: 8px;
-          margin-bottom: 2px;
-          width: 100%;
-          margin-left: auto;
-          margin-right: auto;
-        }
-        
-        /* Image container with 4:3 aspect ratio */
-        .image-container {
-          position: relative;
-          width: 100%;
-          padding-top: 75%; /* 4:3 ratio = 75% */
-          overflow: hidden;
-        }
-
-        /* Position image absolutely within container */
-        .image-container img {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
-          display: block;
-        }
-
-        /* Card image wrapper to hold the container */
-        .card-image {
-          position: relative;
-          margin-bottom: 1px;
-        }
-
-        /* No image container - match the aspect ratio */
-        .no-image {
-          display: flex;
-          width: 100%;
-          padding-top: 75%; /* Match the 4:3 ratio */
-          position: relative;
-        }
-
-        /* No image text - center it properly */
-        .no-image span {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #888;
-          font-style: italic;
-          background-color: #e0e0e0;
-          font-size: 8px;
-        }
-        
-        /* Clean, minimal timestamp styling */
-        .timestamp {
-          position: absolute;
-          bottom: 3px;
-          right: 3px; 
-          width: auto;
-          text-align: right;
-          background-color: rgba(0, 0, 0, 0.5);
-          color: #ddd;
-          font-size: 6px;
-          padding: 1px 2px;
-          line-height: 1;
-          z-index: 100;
-          font-family: monospace;
-          border-radius: 2px;
-          margin: 0;
-        }
-        
-        /* Properly handle page breaks */
-        .page-break {
-          page-break-after: always !important;
-          page-break-before: auto !important;
-          height: 0;
-          visibility: hidden;
-          display: block;
-          margin: 0;
-          padding: 0;
-        }
-        
-        /* Card styling - very small for 5x3 layout */
-        .card {
-          page-break-inside: avoid;
-          display: flex;
-          flex-direction: column;
-          position: relative;
-          margin-bottom: 2px;
-          max-height: 55mm; /* Very small for 5x3 layout */
-          border: 1px solid #ddd;
-          border-radius: 3px;
-        }
-        
-        /* Add this to the last page */
-        .page:last-of-type {
-          page-break-after: avoid;
-        }
-        
-        /* Observations styling - very small for 5x3 layout */
-        .card-observations {
-          padding: 4px 6px 3px;
-          max-height: 45px; /* Very small for 5x3 layout */
-          overflow: hidden;
-          background-color: #f9f9f9;
-        }
-
-        /* Force proper page breaks in PDF output */
-        html, body {
-          height: auto !important;
-          overflow: visible !important;
-        }
-
-        /* Safe header styling to prevent PDF generation issues */
-        .standard-header {
-          max-width: 100%;
-          max-height: 18mm;
-          overflow: hidden;
         }
       </style>
     </head>
