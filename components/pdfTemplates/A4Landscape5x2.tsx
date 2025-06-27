@@ -1,10 +1,7 @@
+import jsPDF from 'jspdf';
 import { CardData } from "../../types/pdfTypes";
 import { HeaderData } from "../../types/types";
-import {
-  generateCommonStyles,
-  generateHeaderHTML,
-  generateFooterHTML,
-} from "./commonPdfElements";
+import { addHeaderToDoc, addFooterToDoc, PDF_COLORS } from './commonPdfElements';
 
 // Helper function to truncate text
 function truncateText(text: string, maxLength: number = 100): string {
@@ -16,263 +13,179 @@ function truncateText(text: string, maxLength: number = 100): string {
 export const generateA4Landscape5x2 = (
   cards: CardData[],
   headerData: HeaderData,
-  includeHeader: boolean
-): string => {
-  const commonStyles = generateCommonStyles("A4Landscape5x2");
-
-  // Define cards per page (5x2 grid = 10 cards per page)
+  includeHeader: boolean = true
+): jsPDF => {
+  const doc = new jsPDF('landscape', 'mm', 'a4');
+  
+  // Page dimensions (landscape)
+  const pageWidth = 297;
+  const pageHeight = 210;
+  const margin = 15;
+  const footerHeight = 15;
+  
+  // Grid setup for 5x2
   const cardsPerPage = 10;
-  const pageCount = Math.ceil(cards.length / cardsPerPage);
-
-  // Generate the header HTML once to reuse
-  const headerHTML = includeHeader
-    ? `<div class="standard-header">${generateHeaderHTML(headerData)}</div>`
-    : '<div class="minimal-header"><div class="report-title">Inspection Report</div></div>';
-
-  // Generate HTML for all pages with page breaks
-  let pagesHTML = "";
-
-  for (let page = 0; page < pageCount; page++) {
-    // Get the cards for this page
-    const startIndex = page * cardsPerPage;
+  const cols = 5;
+  const rows = 2;
+  
+  let currentPage = 1;
+  const totalPages = Math.ceil(cards.length / cardsPerPage);
+  
+  for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+    if (pageIndex > 0) {
+      doc.addPage();
+      currentPage++;
+    }
+    
+    // Add header using common function
+    const headerHeight = addHeaderToDoc(doc, headerData, pageWidth, includeHeader, margin);
+    
+    // Calculate available space for cards
+    const availableHeight = pageHeight - headerHeight - footerHeight - margin;
+    const cardWidth = (pageWidth - (2 * margin) - 40) / cols; // 40mm gap between columns
+    const cardHeight = (availableHeight - 10) / rows; // 10mm gap between rows
+    
+    // Image dimensions (80% of card width, 3:4 ratio)
+    const imageWidth = cardWidth * 0.8;
+    const imageHeight = imageWidth * 0.75; // 3:4 ratio
+    
+    // Get cards for this page
+    const startIndex = pageIndex * cardsPerPage;
     const pageCards = cards.slice(startIndex, startIndex + cardsPerPage);
-
-    // Generate HTML for each card
-    const pageCardItems = pageCards
-      .map((card, index) => {
-        const globalIndex = startIndex + index; // Calculate the global index for numbering
-        return `
-        <div class="card">
-          <div class="card-header">
-            <span class="card-location">${card.location || "No Location"}</span>
-            <span class="card-number">[${globalIndex + 1}]</span>
-          </div>
-          <div class="card-image">
-            ${
-              card.photo
-                ? `
-                <div class="image-container">
-                  <img src="${card.photo}" alt="Photo" />
-                  <div class="timestamp">${card.timestamp || ""}</div>
-                </div>
-              `
-                : `
-                <div class="no-image">
-                  <span>No Image</span>
-                </div>
-              `
-            }
-          </div>
-          <div class="card-observations">
-            <div class="observations-title">Observations:</div>
-            <div class="observations-content">${truncateText(
-              card.observations || "No observations",
-              100 // Short text limit for 5-column layout
-            )}</div>
-          </div>
-        </div>
-      `;
-      })
-      .join("");
-
-    // Only add page break if this is NOT the last page AND there are more cards coming
-    const isLastPage = page === pageCount - 1;
-    const needsPageBreak = !isLastPage;
-
-    pagesHTML += `
-      <div class="page">
-        <div class="page-header">
-          ${headerHTML}
-        </div>
-        
-        <div class="page-content">
-          <div class="grid-container">
-            ${pageCardItems}
-          </div>
-        </div>
-        
-        <div class="page-footer">
-          ${generateFooterHTML(
-            headerData.typeOfReport || "Inspection Report",
-            page + 1,
-            pageCount
-          )}
-        </div>
-        
-        ${needsPageBreak ? '<div class="page-break"></div>' : ""}
-      </div>
-    `;
+    
+    // Draw cards in 5x2 grid
+    pageCards.forEach((card, cardIndex) => {
+      const col = cardIndex % cols;
+      const row = Math.floor(cardIndex / cols);
+      
+      const cardX = margin + col * (cardWidth + 10);
+      const cardY = headerHeight + margin + row * (cardHeight + 5);
+      
+      // Draw card border
+      doc.setLineWidth(0.3);
+      doc.setDrawColor(...PDF_COLORS.gray);
+      doc.rect(cardX, cardY, cardWidth, cardHeight);
+      
+      // Card header (blue background)
+      doc.setFillColor(...PDF_COLORS.blue);
+      doc.rect(cardX, cardY, cardWidth, 6, 'F');
+      
+      // Card header text
+      doc.setTextColor(...PDF_COLORS.black);
+      doc.setFontSize(6);
+      doc.setFont('helvetica', 'bold');
+      doc.text(card.location || 'No Location', cardX + 1, cardY + 4);
+      
+      // Card number on right
+      const cardNumber = `[${startIndex + cardIndex + 1}]`;
+      const numberWidth = doc.getTextWidth(cardNumber);
+      doc.text(cardNumber, cardX + cardWidth - numberWidth - 1, cardY + 4);
+      
+      // Image area (centered, 80% width)
+      const imageX = cardX + (cardWidth - imageWidth) / 2;
+      const imageY = cardY + 12; // Adjust this value based on each template's layout
+      
+      if (card.photo) {
+        try {
+          // Check if photo is valid base64
+          if (card.photo.startsWith('data:image/')) {
+            doc.addImage(card.photo, 'JPEG', imageX, imageY, imageWidth, imageHeight);
+          } else {
+            throw new Error('Invalid image format');
+          }
+        } catch (error) {
+          // Fallback: draw placeholder
+          doc.setFillColor(...PDF_COLORS.lightGray);
+          doc.rect(imageX, imageY, imageWidth, imageHeight, 'F');
+          doc.setTextColor(...PDF_COLORS.darkGray);
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'italic');
+          const noImageText = 'Image Error';
+          const textWidth = doc.getTextWidth(noImageText);
+          doc.text(noImageText, imageX + (imageWidth - textWidth) / 2, imageY + imageHeight / 2);
+        }
+      } else {
+        // No image placeholder
+        doc.setFillColor(...PDF_COLORS.lightGray);
+        doc.rect(imageX, imageY, imageWidth, imageHeight, 'F');
+        doc.setTextColor(...PDF_COLORS.darkGray);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        const noImageText = 'No Image';
+        const textWidth = doc.getTextWidth(noImageText);
+        doc.text(noImageText, imageX + (imageWidth - textWidth) / 2, imageY + imageHeight / 2);
+      }
+      
+      // Timestamp overlay (if exists)
+      if (card.timestamp && card.photo) {
+        doc.setFillColor(0, 0, 0, 0.7);
+        doc.rect(imageX, imageY + imageHeight - 5, imageWidth, 5, 'F');
+        doc.setTextColor(...PDF_COLORS.white);
+        doc.setFontSize(4);
+        doc.setFont('helvetica', 'normal');
+        doc.text(card.timestamp, imageX + 1, imageY + imageHeight - 1.5);
+      }
+      
+      // Observations section
+      const obsY = imageY + imageHeight + 2;
+      const obsHeight = cardY + cardHeight - obsY - 1;
+      
+      // Observations background
+      doc.setFillColor(249, 249, 249);
+      doc.rect(cardX + 0.5, obsY, cardWidth - 1, obsHeight, 'F');
+      
+      // Observations title
+      doc.setTextColor(...PDF_COLORS.black);
+      doc.setFontSize(6);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Observations:', cardX + 2, obsY + 3);
+      
+      // Observations content
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(5);
+      const observations = truncateText(card.observations || 'No observations');
+      const maxWidth = cardWidth - 4;
+      const lines = doc.splitTextToSize(observations, maxWidth);
+      
+      // Limit to available space
+      const maxLines = Math.floor((obsHeight - 6) / 1.5);
+      const displayLines = lines.slice(0, maxLines);
+      
+      displayLines.forEach((line: string, lineIndex: number) => {
+        doc.text(line, cardX + 2, obsY + 6 + lineIndex * 1.5);
+      });
+    });
+    
+    // Add footer using common function
+    addFooterToDoc(doc, currentPage, totalPages, pageWidth, pageHeight, margin);
   }
+  
+  return doc;
+};
 
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <title>${headerData.typeOfReport || "Inspection Report"}</title>
-      <style>
-        ${commonStyles}
-        
-        /* Define A4 page size explicitly as LANDSCAPE and remove ALL margins */
-        @page {
-          size: A4 landscape;
-          margin: 0;
-          orphans: 0;
-          widows: 0;
-        }
-
-        /* Reset all browser default margins and padding */
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-
-        /* Make sure the body has no margins */
-        body {
-          font-family: 'Helvetica Neue', Arial, sans-serif;
-          font-size: 9px;
-          margin: 0;
-          padding: 0;
-          color: #333;
-        }
-
-        /* Container should also have no margins */
-        .container {
-          margin: 0;
-          padding: 0;
-          page-break-after: avoid !important;
-        }
-
-        /* Page structure with landscape dimensions */
-        .page {
-          position: relative;
-          width: 297mm;
-          height: 210mm;
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          overflow: hidden;
-          page-break-after: avoid;
-          page-break-inside: avoid;
-        }
-
-        /* Header fixed at top of page */
-        .page-header {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          width: 100%;
-          padding: 4mm 15mm;
-        }
-
-        /* Page content positioning - adjust spacing with explicit height */
-        .page-content {
-          position: absolute;
-          top: 20mm;
-          bottom: 15mm;
-          left: 0;
-          right: 0;
-          width: 95%;
-          height: 173mm;
-          margin: 0 auto;
-          overflow: visible;
-          padding-top: 3mm;
-        }
-
-        /* Footer fixed at bottom of page */
-        .page-footer {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          width: 100%;
-          padding: 4mm 15mm;
-          text-align: center;
-          background-color: white;
-        }
-
-        /* Grid container for 5x2 layout */
-        .grid-container {
-          display: grid;
-          grid-template-columns: repeat(5, 1fr); /* 5 equal columns */
-          grid-template-rows: repeat(2, 1fr); /* 2 equal rows - changed from auto to 1fr */
-          gap: 8px;
-          margin-bottom: 2px;
-          width: 100%;
-          height: 100%; /* Ensure grid takes full height */
-          margin-left: auto;
-          margin-right: auto;
-        }
-
-        /* Card styling for 5x2 layout */
-        .card {
-          page-break-inside: avoid;
-          display: flex;
-          flex-direction: column;
-          position: relative;
-          margin-bottom: 2px;
-          height: 100%; /* Let card fill grid cell */
-          border: 1px solid #ddd;
-          border-radius: 3px;
-        }
-
-        /* Card header (location and card number) */
-        .card-header {
-          background-color: #007BFF;
-          color: #000;
-          padding: 4px 6px;
-          font-weight: bold;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-size: 8px;
-          height: 6mm; /* Reduced height */
-        }
-
-        /* Image container with 3:4 aspect ratio */
-        .image-container {
-          position: relative;
-          width: 100%;
-          padding-top: 37.5%; /* Reduced from 75% to 37.5% (50% smaller) */
-          overflow: hidden;
-        }
-
-        /* Observations section */
-        .card-observations {
-          padding: 4px 6px 3px;
-          max-height: 12mm; /* Increased height */
-          overflow: hidden;
-          background-color: #f9f9f9;
-        }
-
-        .observations-title {
-          font-weight: bold;
-          margin-bottom: 1px;
-          color: #333;
-          font-size: 8px;
-          display: inline-block;
-        }
-
-        .observations-content {
-          white-space: pre-wrap;
-          font-size: 7px;
-          line-height: 1.1;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          display: -webkit-box;
-          -webkit-line-clamp: 4;
-          -webkit-box-orient: vertical;
-          color: #333;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        ${pagesHTML}
-      </div>
-    </body>
-    </html>
-  `;
+// React Native compatible download function
+export const downloadA4Landscape5x2PDF = async (
+  cards: CardData[],
+  headerData: HeaderData,
+  includeHeader: boolean = true
+): Promise<string | null> => {
+  try {
+    console.log('Starting A4Landscape5x2 PDF generation...');
+    
+    const doc = generateA4Landscape5x2(cards, headerData, includeHeader);
+    
+    console.log('PDF document created, converting to base64...');
+    
+    // Get base64 data (React Native compatible)
+    const pdfDataUri = doc.output('datauristring');
+    const base64Data = pdfDataUri.split(',')[1];
+    
+    console.log('Base64 conversion complete, length:', base64Data.length);
+    
+    return base64Data;
+    
+  } catch (error) {
+    console.error('Error in downloadA4Landscape5x2PDF:', error);
+    return null;
+  }
 };
