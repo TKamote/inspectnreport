@@ -197,10 +197,11 @@ export const generateA4Landscape5x2 = (
         .grid-container {
           display: grid;
           grid-template-columns: repeat(5, 1fr); /* 5 equal columns */
-          grid-template-rows: repeat(2, auto); /* 2 auto-sized rows */
+          grid-template-rows: repeat(2, 1fr); /* 2 equal rows - changed from auto to 1fr */
           gap: 8px;
           margin-bottom: 2px;
           width: 100%;
+          height: 100%; /* Ensure grid takes full height */
           margin-left: auto;
           margin-right: auto;
         }
@@ -212,7 +213,7 @@ export const generateA4Landscape5x2 = (
           flex-direction: column;
           position: relative;
           margin-bottom: 2px;
-          max-height: 70mm; /* Adjusted for 5x2 layout */
+          height: 100%; /* Let card fill grid cell */
           border: 1px solid #ddd;
           border-radius: 3px;
         }
@@ -234,7 +235,7 @@ export const generateA4Landscape5x2 = (
         .image-container {
           position: relative;
           width: 100%;
-          padding-top: 75%; /* 3:4 ratio = 75% */
+          padding-top: 37.5%; /* Reduced from 75% to 37.5% (50% smaller) */
           overflow: hidden;
         }
 

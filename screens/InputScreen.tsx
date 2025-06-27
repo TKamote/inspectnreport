@@ -27,7 +27,7 @@ const getTemplateDisplayName = (templateCode: string): string => {
     A4Portrait2x3: "A4 Portrait: 2-Col x 3-Row Grid",
     A4Landscape3x2: "A4 Landscape: 3-Col x 2-Row Grid",
     A4Landscape4x2: "A4 Landscape: 4-Col x 2-Row Grid",
-    A4Landscape5x3: "A4 Landscape: 5-Col x 2-Row Grid",
+    A4Landscape5x2: "A4 Landscape: 5-Col x 2-Row Grid",
   };
 
   return displayNames[templateCode] || templateCode;
@@ -35,12 +35,21 @@ const getTemplateDisplayName = (templateCode: string): string => {
 
 // Add this function at the top of your component, after the imports
 const getImageDimensions = (template: string) => {
-  if (template === "A4Landscape5x2") {
+  // Define photo orientations for each template explicitly
+  const photoOrientations: Record<string, "portrait" | "landscape"> = {
+    A4Portrait2x2: "portrait", // photo is portrait
+    A4Portrait2x3: "landscape", // photo is landscape
+    A4Landscape3x2: "landscape", // photo is landscape
+    A4Landscape4x2: "landscape", // photo is landscape
+    A4Landscape5x2: "portrait", // photo is portrait
+  };
+
+  const orientation = photoOrientations[template] || "landscape"; // default to landscape
+
+  if (orientation === "portrait") {
     return { width: 200, height: 267 }; // 3:4 ratio for portrait photos
-  } else if (template.includes("Portrait")) {
-    return { width: 200, height: 267 }; // Default 3:4 ratio for portrait templates
   } else {
-    return { width: 200, height: 150 }; // 4:3 ratio for landscape templates
+    return { width: 200, height: 150 }; // 4:3 ratio for landscape photos
   }
 };
 
