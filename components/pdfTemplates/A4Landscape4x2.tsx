@@ -1,7 +1,16 @@
 import jsPDF from 'jspdf';
 import { CardData } from "../../types/pdfTypes";
 import { HeaderData } from "../../types/types";
-import { addHeaderToDoc, addFooterToDoc, PDF_COLORS } from './commonPdfElements';
+import {
+  addHeaderToDoc,
+  addFooterToDoc,
+  addCardHeader,
+  addImageToCard,
+  addTimestampToImage,
+  addObservationsSection,
+  addCardBorder,
+  PDF_COLORS,
+} from './commonPdfElements';
 
 // Helper function to truncate text
 function truncateText(text: string, maxLength: number = 150): string {
@@ -45,9 +54,9 @@ export const generateA4Landscape4x2 = (
     const cardWidth = (pageWidth - (2 * margin) - 30) / cols; // 30mm gap between columns
     const cardHeight = (availableHeight - 10) / rows; // 10mm gap between rows
     
-    // Image dimensions (80% of card width, 3:4 ratio)
-    const imageWidth = cardWidth * 0.8;
-    const imageHeight = imageWidth * 0.75; // 3:4 ratio
+    // Image dimensions (4:3 ratio - wide images)
+    const imageWidth = cardWidth - 2; // Full width minus 1px padding each side
+    const imageHeight = imageWidth * 0.75; // 4:3 ratio (wider images)
     
     // Get cards for this page
     const startIndex = pageIndex * cardsPerPage;
@@ -61,99 +70,30 @@ export const generateA4Landscape4x2 = (
       const cardX = margin + col * (cardWidth + 10);
       const cardY = headerHeight + margin + row * (cardHeight + 5);
       
-      // Draw card border
-      doc.setLineWidth(0.3);
-      doc.setDrawColor(...PDF_COLORS.gray);
-      doc.rect(cardX, cardY, cardWidth, cardHeight);
+      // Image area (touches side borders)
+      const imageX = cardX + 1; // Start at card edge + 1px padding
+      const imageY = cardY + 12;
       
-      // Card header (blue background)
-      doc.setFillColor(...PDF_COLORS.blue);
-      doc.rect(cardX, cardY, cardWidth, 8, 'F');
+      // Add card header
+      addCardHeader(doc, cardX, cardY, cardWidth, card.location, startIndex + cardIndex + 1);
       
-      // Card header text
-      doc.setTextColor(...PDF_COLORS.black);
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'bold');
-      doc.text(card.location || 'No Location', cardX + 2, cardY + 5.5);
+      // Add image with automatic fallback
+      addImageToCard(doc, card.photo, imageX, imageY, imageWidth, imageHeight, cardIndex);
       
-      // Card number on right
-      const cardNumber = `[${startIndex + cardIndex + 1}]`;
-      const numberWidth = doc.getTextWidth(cardNumber);
-      doc.text(cardNumber, cardX + cardWidth - numberWidth - 2, cardY + 5.5);
-      
-      // Image area (centered, 80% width)
-      const imageX = cardX + (cardWidth - imageWidth) / 2;
-      const imageY = cardY + 12; // Adjust this value based on each template's layout
-      
-      if (card.photo) {
-        try {
-          // Check if photo is valid base64
-          if (card.photo.startsWith('data:image/')) {
-            doc.addImage(card.photo, 'JPEG', imageX, imageY, imageWidth, imageHeight);
-          } else {
-            throw new Error('Invalid image format');
-          }
-        } catch (error) {
-          // Fallback: draw placeholder
-          doc.setFillColor(...PDF_COLORS.lightGray);
-          doc.rect(imageX, imageY, imageWidth, imageHeight, 'F');
-          doc.setTextColor(...PDF_COLORS.darkGray);
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'italic');
-          const noImageText = 'Image Error';
-          const textWidth = doc.getTextWidth(noImageText);
-          doc.text(noImageText, imageX + (imageWidth - textWidth) / 2, imageY + imageHeight / 2);
-        }
-      } else {
-        // No image placeholder
-        doc.setFillColor(...PDF_COLORS.lightGray);
-        doc.rect(imageX, imageY, imageWidth, imageHeight, 'F');
-        doc.setTextColor(...PDF_COLORS.darkGray);
-        doc.setFontSize(8);
-        doc.setFont('helvetica', 'italic');
-        const noImageText = 'No Image';
-        const textWidth = doc.getTextWidth(noImageText);
-        doc.text(noImageText, imageX + (imageWidth - textWidth) / 2, imageY + imageHeight / 2);
-      }
-      
-      // Timestamp overlay (if exists)
+      // Add timestamp if exists
       if (card.timestamp && card.photo) {
-        doc.setFillColor(0, 0, 0, 0.7);
-        doc.rect(imageX, imageY + imageHeight - 6, imageWidth, 6, 'F');
-        doc.setTextColor(...PDF_COLORS.white);
-        doc.setFontSize(5);
-        doc.setFont('helvetica', 'normal');
-        doc.text(card.timestamp, imageX + 2, imageY + imageHeight - 2);
+        addTimestampToImage(doc, card.timestamp, imageX, imageY, imageHeight);
       }
       
       // Observations section
       const obsY = imageY + imageHeight + 3;
       const obsHeight = cardY + cardHeight - obsY - 2;
       
-      // Observations background
-      doc.setFillColor(249, 249, 249);
-      doc.rect(cardX + 1, obsY, cardWidth - 2, obsHeight, 'F');
+      // Add observations section
+      addObservationsSection(doc, cardX, obsY, cardWidth, obsHeight, card.observations);
       
-      // Observations title
-      doc.setTextColor(...PDF_COLORS.black);
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Observations:', cardX + 3, obsY + 5);
-      
-      // Observations content
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(6);
-      const observations = truncateText(card.observations || 'No observations');
-      const maxWidth = cardWidth - 6;
-      const lines = doc.splitTextToSize(observations, maxWidth);
-      
-      // Limit to available space
-      const maxLines = Math.floor((obsHeight - 8) / 2);
-      const displayLines = lines.slice(0, maxLines);
-      
-      displayLines.forEach((line: string, lineIndex: number) => {
-        doc.text(line, cardX + 3, obsY + 8 + lineIndex * 2);
-      });
+      // Add final card border (at the very end)
+      addCardBorder(doc, cardX, cardY, cardWidth, cardHeight);
     });
     
     // Add footer using common function
@@ -176,7 +116,6 @@ export const downloadA4Landscape4x2PDF = async (
     
     console.log('PDF document created, converting to base64...');
     
-    // Get base64 data (React Native compatible)
     const pdfDataUri = doc.output('datauristring');
     const base64Data = pdfDataUri.split(',')[1];
     

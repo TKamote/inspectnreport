@@ -132,7 +132,7 @@ const generatePDFByTemplate = async (options: PDFGenerationOptions): Promise<str
         return await downloadA4Landscape3x2PDF(cards, headerData, includeHeader);
       case "A4Landscape4x2":
         return await downloadA4Landscape4x2PDF(cards, headerData, includeHeader);
-      case "A4Landscape5x3":
+      case "A4Landscape5x2":
         return await downloadA4Landscape5x2PDF(cards, headerData, includeHeader);
       default:
         return await downloadA4Portrait2x2PDF(cards, headerData, includeHeader);
@@ -149,6 +149,14 @@ export const generatePDF = async (
   onProgress?: (info: ProgressInfo) => void
 ): Promise<boolean> => {
   try {
+    console.log('=== GENERATE PDF START ===');
+    console.log('Options received:', {
+      cardsCount: options.cards.length,
+      template: options.template,
+      includeHeader: options.includeHeader,
+      headerData: options.headerData
+    });
+    
     if (onProgress)
       onProgress({ step: "init", message: "Starting PDF generation..." });
 

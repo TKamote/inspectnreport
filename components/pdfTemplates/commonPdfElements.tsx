@@ -20,43 +20,50 @@ export const addHeaderToDoc = (
   margin: number = 15
 ): number => {
   if (!includeHeader) {
-    // Minimal header - just title
+    // Minimal header - just title with reduced spacing
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...PDF_COLORS.black);
     const title = 'Inspection Report';
     const titleWidth = doc.getTextWidth(title);
-    doc.text(title, (pageWidth - titleWidth) / 2, 25);
-    return 35; // Return height used
+    doc.text(title, (pageWidth - titleWidth) / 2, 18);
+    return 25;
   }
 
-  // Full header
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
+  // Full header with improved layout and reduced line heights
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
   doc.setTextColor(...PDF_COLORS.black);
   
-  // Company and Created By on first row
-  doc.text(`Company: ${headerData.company || 'Company Name'}`, margin, 15);
-  doc.text(`Created By: ${headerData.createdBy || 'Inspector'}`, margin, 25);
+  // Row 1: Company and Created By on left with 20px spacing
+  const companyText = `Company: ${headerData.company || 'Company Name'}`;
+  const createdByText = `Created By: ${headerData.createdBy || 'Inspector'}`;
   
-  // Report For and Date on second row
-  doc.text(`Report For: ${headerData.reportFor || 'Client'}`, margin, 35);
+  doc.text(companyText, margin, 15);
+  const companyWidth = doc.getTextWidth(companyText);
+  doc.text(createdByText, margin + companyWidth + 10, 15);
+  
+  // Row 2: Report For on left, Date on right (space-between layout)
+  const reportForText = `Report For: ${headerData.reportFor || 'Client'}`;
   const dateText = `Date: ${headerData.date || new Date().toLocaleDateString()}`;
-  const dateWidth = doc.getTextWidth(dateText);
-  doc.text(dateText, pageWidth - margin - dateWidth, 35);
   
-  // Title
-  doc.setFontSize(16);
+  doc.text(reportForText, margin, 21);
+  const dateWidth = doc.getTextWidth(dateText);
+  doc.text(dateText, pageWidth - margin - dateWidth, 21);
+  
+  // Title with reduced spacing
+  doc.setFontSize(13);
+  doc.setFont('helvetica', 'bold');
   const title = headerData.typeOfReport || 'Inspection Report';
   const titleWidth = doc.getTextWidth(title);
-  doc.text(title, (pageWidth - titleWidth) / 2, 50);
+  doc.text(title, (pageWidth - titleWidth) / 2, 31);
   
-  // Header line
+  // Header line closer to title
   doc.setLineWidth(0.5);
   doc.setDrawColor(...PDF_COLORS.gray);
-  doc.line(margin, 55, pageWidth - margin, 55);
+  doc.line(margin, 35, pageWidth - margin, 35);
   
-  return 65; // Return height used
+  return 10; // Content spacing as requested
 };
 
 // Add footer to jsPDF document
@@ -79,4 +86,172 @@ export const addFooterToDoc = (
   const pageText = `Page ${currentPage} of ${totalPages}`;
   const pageTextWidth = doc.getTextWidth(pageText);
   doc.text(pageText, pageWidth - margin - pageTextWidth, pageHeight - 8);
+};
+
+// Add timestamp overlay to image
+export const addTimestampToImage = (
+  doc: jsPDF,
+  timestamp: string,
+  imageX: number,
+  imageY: number,
+  imageHeight: number
+): void => {
+  if (!timestamp) return;
+  
+  // Increase font size from 5 to 6
+  doc.setFontSize(6);
+  doc.setFont('helvetica', 'bold'); // Changed to bold for better visibility
+  
+  // Remove background - delete these lines:
+  // const timestampWidth = doc.getTextWidth(timestamp);
+  // doc.setFillColor(0, 0, 0, 0.4);
+  // doc.rect(imageX + 1, imageY + imageHeight - 5, timestampWidth + 2, 4, 'F');
+  
+  // Add text stroke/outline for visibility on white backgrounds
+  doc.setTextColor(0, 0, 0); // Black text
+  doc.setLineWidth(0.3);
+  doc.setDrawColor(255, 255, 255); // White outline
+  
+  // Draw text with outline effect (multiple passes for stroke)
+  const textX = imageX + 2;
+  const textY = imageY + imageHeight - 2;
+  
+  // White outline (draw text slightly offset in multiple directions)
+  doc.setTextColor(255, 255, 255);
+  doc.text(timestamp, textX - 0.1, textY);
+  doc.text(timestamp, textX + 0.1, textY);
+  doc.text(timestamp, textX, textY - 0.1);
+  doc.text(timestamp, textX, textY + 0.1);
+  
+  // Black text on top
+  doc.setTextColor(0, 0, 0);
+  doc.text(timestamp, textX, textY);
+};
+
+// Add image with fallback placeholder
+export const addImageToCard = (
+  doc: jsPDF,
+  photo: string | null | undefined,
+  imageX: number,
+  imageY: number,
+  imageWidth: number,
+  imageHeight: number,
+  cardIndex: number
+): void => {
+  if (photo) {
+    try {
+      // Check if photo is valid base64
+      if (photo.startsWith('data:image/')) {
+        console.log(`Adding image for card ${cardIndex + 1}`);
+        doc.addImage(photo, 'JPEG', imageX, imageY, imageWidth, imageHeight);
+        console.log('Image added successfully');
+      } else {
+        throw new Error('Invalid image format');
+      }
+    } catch (error) {
+      console.error('Error adding image for card', cardIndex + 1, ':', error);
+      // Fallback: draw placeholder
+      addImagePlaceholder(doc, imageX, imageY, imageWidth, imageHeight, 'Image Error');
+    }
+  } else {
+    // No image placeholder
+    console.log(`No image for card ${cardIndex + 1}, using placeholder`);
+    addImagePlaceholder(doc, imageX, imageY, imageWidth, imageHeight, 'No Image');
+  }
+};
+
+// Add image placeholder
+export const addImagePlaceholder = (
+  doc: jsPDF,
+  imageX: number,
+  imageY: number,
+  imageWidth: number,
+  imageHeight: number,
+  text: string
+): void => {
+  doc.setFillColor(...PDF_COLORS.lightGray);
+  doc.rect(imageX, imageY, imageWidth, imageHeight, 'F');
+  doc.setTextColor(...PDF_COLORS.darkGray);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'italic');
+  const textWidth = doc.getTextWidth(text);
+  doc.text(text, imageX + (imageWidth - textWidth) / 2, imageY + imageHeight / 2);
+};
+
+// Add card header (location and serial number)
+export const addCardHeader = (
+  doc: jsPDF,
+  cardX: number,
+  cardY: number,
+  cardWidth: number,
+  location: string | null | undefined,
+  cardNumber: number
+): void => {
+  // Card header (white background with border)
+  doc.setFillColor(...PDF_COLORS.white);
+  doc.rect(cardX, cardY, cardWidth, 8, 'F');
+
+  // Add border for the white header
+  doc.setLineWidth(0.2);
+  doc.setDrawColor(...PDF_COLORS.gray);
+  doc.rect(cardX, cardY, cardWidth, 8);
+
+  // Card header text
+  doc.setTextColor(...PDF_COLORS.black);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.text(location || 'No Location', cardX + 2, cardY + 5.5);
+
+  // Card number on right
+  const cardNumberText = `[${cardNumber}]`;
+  const numberWidth = doc.getTextWidth(cardNumberText);
+  doc.text(cardNumberText, cardX + cardWidth - numberWidth - 2, cardY + 5.5);
+};
+
+// Add observations section
+export const addObservationsSection = (
+  doc: jsPDF,
+  cardX: number,
+  obsY: number,
+  cardWidth: number,
+  obsHeight: number,
+  observations: string | null | undefined
+): void => {
+  // Observations background
+  doc.setFillColor(249, 249, 249);
+  doc.rect(cardX + 1, obsY, cardWidth - 2, obsHeight, 'F');
+
+  // Observations title
+  doc.setTextColor(...PDF_COLORS.black);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Observations:', cardX + 3, obsY + 2);
+
+  // Observations content
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  const truncatedObs = observations || 'No observations';
+  const maxWidth = cardWidth - 2;
+  const lines = doc.splitTextToSize(truncatedObs, maxWidth);
+
+  // Limit to available space
+  const maxLines = Math.floor((obsHeight - 6) / 2.5);
+  const displayLines = lines.slice(0, maxLines);
+
+  displayLines.forEach((line: string, lineIndex: number) => {
+    doc.text(line, cardX + 3, obsY + 6 + lineIndex * 2.5);
+  });
+};
+
+// Add final card border (encompassing all sections)
+export const addCardBorder = (
+  doc: jsPDF,
+  cardX: number,
+  cardY: number,
+  cardWidth: number,
+  cardHeight: number
+): void => {
+  doc.setLineWidth(0.2);
+  doc.setDrawColor(...PDF_COLORS.gray);
+  doc.rect(cardX, cardY, cardWidth, cardHeight);
 };
