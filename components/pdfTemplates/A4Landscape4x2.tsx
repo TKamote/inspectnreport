@@ -19,6 +19,14 @@ function truncateText(text: string, maxLength: number = 150): string {
   return text.substring(0, maxLength) + "...";
 }
 
+const getContentSpacing = (includeHeader: boolean, headerHeight: number): number => {
+  if (!includeHeader) {
+    return 12; // Reduced spacing for default title
+  } else {
+    return 15; // Normal spacing when full header is displayed
+  }
+};
+
 export const generateA4Landscape4x2 = (
   cards: CardData[],
   headerData: HeaderData,
@@ -29,7 +37,8 @@ export const generateA4Landscape4x2 = (
   // Page dimensions (landscape)
   const pageWidth = 297;
   const pageHeight = 210;
-  const margin = 15;
+  const margin = 15; // Keep for content positioning
+  const headerFooterMargin = 19; // Changed from 17 to 19 (+4mm for header/footer)
   const footerHeight = 15;
 
   // Grid setup for 4x2
@@ -52,7 +61,7 @@ export const generateA4Landscape4x2 = (
       headerData,
       pageWidth,
       includeHeader,
-      margin
+      headerFooterMargin
     );
 
     // Calculate available space for cards
@@ -74,7 +83,7 @@ export const generateA4Landscape4x2 = (
       const totalUsedWidth = cols * cardWidth + (cols - 1) * 7; // Changed from 8 to 7
       const horizontalOffset = (pageWidth - 2 * margin - totalUsedWidth) / 2;
       const cardX = margin + horizontalOffset + col * (cardWidth + 7); // Changed from +8 to +7
-      const cardY = headerHeight + margin + 15 + row * (cardHeight + 5); // Add +15 instead of +10
+      const cardY = headerHeight + getContentSpacing(includeHeader, headerHeight) + row * (cardHeight + 5); // Add +15 instead of +10
 
       // Image area (touches side borders)
       const imageX = cardX; // Remove the +1 padding
@@ -125,7 +134,7 @@ export const generateA4Landscape4x2 = (
     });
 
     // Add footer using common function
-    addFooterToDoc(doc, currentPage, totalPages, pageWidth, pageHeight, margin);
+    addFooterToDoc(doc, currentPage, totalPages, pageWidth, pageHeight, headerFooterMargin);
   }
 
   return doc;

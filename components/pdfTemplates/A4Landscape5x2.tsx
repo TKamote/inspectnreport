@@ -19,6 +19,14 @@ function truncateText(text: string, maxLength: number = 100): string {
   return text.substring(0, maxLength) + "...";
 }
 
+const getContentSpacing = (includeHeader: boolean, headerHeight: number): number => {
+  if (!includeHeader) {
+    return 10; // Reduced spacing for default title
+  } else {
+    return 10; // Normal spacing when full header is displayed (already tight)
+  }
+};
+
 export const generateA4Landscape5x2 = (
   cards: CardData[],
   headerData: HeaderData,
@@ -29,7 +37,8 @@ export const generateA4Landscape5x2 = (
   // Page dimensions (landscape)
   const pageWidth = 297;
   const pageHeight = 210;
-  const margin = 15;
+  const margin = 15; // Keep for content positioning
+  const headerFooterMargin = 23; // Changed from 17 to 23 (+8mm for header/footer)
   const footerHeight = 15;
   
   // Grid setup for 5x2
@@ -47,7 +56,7 @@ export const generateA4Landscape5x2 = (
     }
     
     // Add header using common function
-    const headerHeight = addHeaderToDoc(doc, headerData, pageWidth, includeHeader, margin);
+    const headerHeight = addHeaderToDoc(doc, headerData, pageWidth, includeHeader, headerFooterMargin);
     
     // Calculate available space for cards
     const availableHeight = pageHeight - headerHeight - footerHeight - margin;
@@ -70,7 +79,7 @@ export const generateA4Landscape5x2 = (
       const totalUsedWidth = cols * cardWidth + (cols - 1) * 8; // Use 8mm gaps (reduced from 10mm)
       const horizontalOffset = (pageWidth - 2 * margin - totalUsedWidth) / 2; // Center horizontally
       const cardX = margin + horizontalOffset + col * (cardWidth + 8); // Add horizontal offset with 8mm gaps;
-      const cardY = headerHeight + margin + 10 + row * (cardHeight + 2); // Changed from +5 to +2 (regain 3px per row)
+      const cardY = headerHeight + getContentSpacing(includeHeader, headerHeight) + row * (cardHeight + 2); // Changed from +5 to +2 (regain 3px per row)
       
       // Image area (touches side borders)
       const imageX = cardX; // Remove the +1 padding
@@ -99,7 +108,7 @@ export const generateA4Landscape5x2 = (
     });
     
     // Add footer using common function
-    addFooterToDoc(doc, currentPage, totalPages, pageWidth, pageHeight, margin);
+    addFooterToDoc(doc, currentPage, totalPages, pageWidth, pageHeight, headerFooterMargin);
   }
   
   return doc;

@@ -12,6 +12,16 @@ import {
   PDF_COLORS,
 } from "./commonPdfElements";
 
+const getContentSpacing = (includeHeader: boolean, headerHeight: number): number => {
+  if (!includeHeader) {
+    // No header selected - use reduced spacing for default title
+    return 20; // Changed from 15 to 10 (additional 5mm reduction)
+  } else {
+    // Full header selected - use normal spacing
+    return 30; // Normal spacing when full header is displayed
+  }
+};
+
 export const generateA4Portrait2x2 = (
   cards: CardData[],
   headerData: HeaderData,
@@ -22,7 +32,8 @@ export const generateA4Portrait2x2 = (
   // Page dimensions
   const pageWidth = 210;
   const pageHeight = 297;
-  const margin = 15;
+  const margin = 15; // Keep for content positioning  
+  const headerFooterMargin = 23; // Changed from 21 to 23 (+8mm for header/footer)
   const footerHeight = 15;
 
   // Grid setup for 2x2
@@ -45,7 +56,7 @@ export const generateA4Portrait2x2 = (
       headerData,
       pageWidth,
       includeHeader,
-      margin
+      headerFooterMargin
     );
 
     // Calculate available space for cards
@@ -71,7 +82,7 @@ export const generateA4Portrait2x2 = (
       const totalUsedWidth = cols * cardWidth + (cols - 1) * 20; // Total width used by cards and gaps
       const horizontalOffset = (pageWidth - 2 * margin - totalUsedWidth) / 2; // Center horizontally
       const cardX = margin + horizontalOffset + col * (cardWidth + 20);
-      const cardY = headerHeight + 30 + row * (cardHeight + 5);
+      const cardY = headerHeight + getContentSpacing(includeHeader, headerHeight) + row * (cardHeight + 5);
 
       // Image area (touches side borders)
       const imageX = cardX; // Start at card edge + 1px padding
@@ -122,7 +133,7 @@ export const generateA4Portrait2x2 = (
     });
 
     // Add footer using common function
-    addFooterToDoc(doc, currentPage, totalPages, pageWidth, pageHeight, margin);
+    addFooterToDoc(doc, currentPage, totalPages, pageWidth, pageHeight, headerFooterMargin);
   }
 
   return doc;
