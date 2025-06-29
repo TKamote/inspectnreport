@@ -50,12 +50,12 @@ export const generateA4Portrait2x3 = (
 
     // Calculate available space for cards
     const availableHeight = pageHeight - headerHeight - footerHeight - margin;
-    const cardWidth = ((pageWidth - 2 * margin - 10) / cols) * 0.85;
-    const cardHeight = cardWidth * 0.75; // 4:3 ratio for cards
+    const cardWidth = ((pageWidth - 2 * margin - 10) / cols) * 0.82;
 
     // Image dimensions (4:3 ratio - wide images)
     const imageWidth = cardWidth; // Remove the -2
     const imageHeight = imageWidth * 0.75; // 4:3 ratio (wider images)
+    const cardHeight = imageHeight + 25;
 
     // Get cards for this page
     const startIndex = pageIndex * cardsPerPage;
@@ -66,8 +66,10 @@ export const generateA4Portrait2x3 = (
       const col = cardIndex % cols;
       const row = Math.floor(cardIndex / cols);
 
-      const cardX = margin + col * (cardWidth + 5);
-     const cardY = headerHeight + margin + 15 + row * (cardHeight + 10); // Add +10 for extra spacing
+      const totalUsedWidth = cols * cardWidth + (cols - 1) * 13; // Changed from 5 to 15 (larger gap)
+      const horizontalOffset = (pageWidth - 2 * margin - totalUsedWidth) / 2;
+      const cardX = margin + horizontalOffset + col * (cardWidth + 13); // Changed from 5 to 15
+      const cardY = headerHeight + margin + 15 + row * (cardHeight + 4); // Add +10 for extra spacing
 
       // Image area (touches side borders)
       const imageX = cardX; // Remove the +1
@@ -100,15 +102,15 @@ export const generateA4Portrait2x3 = (
       }
 
       // Observations section
-      const obsY = imageY + imageHeight + 3;
-      const obsHeight = cardY + cardHeight - obsY - 2;
+      const obsY = imageY + imageHeight + 2; // Add 2px gap between image and observations
+      const obsHeight = cardY + cardHeight - obsY - 1;
 
       // Add observations section
       addObservationsSection(
         doc,
         cardX,
         obsY,
-        cardWidth,
+        cardWidth - 2, // Changed from cardWidth - 4 to cardWidth - 2
         obsHeight,
         card.observations
       );

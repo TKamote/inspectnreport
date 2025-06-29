@@ -103,7 +103,7 @@ export const generateA4Portrait2x2 = (
 
       // Observations section
       const obsY = imageY + imageHeight + 1;
-      const obsHeight = cardY + cardHeight - obsY - 2;
+      const obsHeight = cardY + cardHeight - obsY - 1;
 
       // Add observations section
       addObservationsSection(
