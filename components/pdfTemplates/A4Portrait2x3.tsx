@@ -155,20 +155,13 @@ export const downloadA4Portrait2x3PDF = async (
   includeHeader: boolean = true
 ): Promise<string | null> => {
   try {
-    console.log("Starting A4Portrait2x3 PDF generation...");
-
     const doc = generateA4Portrait2x3(cards, headerData, includeHeader);
-
-    console.log("PDF document created, converting to base64...");
 
     const pdfDataUri = doc.output("datauristring");
     const base64Data = pdfDataUri.split(",")[1];
 
-    console.log("Base64 conversion complete, length:", base64Data.length);
-
     return base64Data;
   } catch (error) {
-    console.error("Error in downloadA4Portrait2x3PDF:", error);
     return null;
   }
 };

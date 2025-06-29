@@ -113,14 +113,14 @@ export const addTimestampToImage = (
   const textX = imageX + 2;
   const textY = imageY + imageHeight - 2;
 
-  // White outline (draw text slightly offset in multiple directions)
+  // White outline (reduce offset from 0.1 to 0.05 for less obvious spacing):
   doc.setTextColor(255, 255, 255);
-  doc.text(timestamp, textX - 0.1, textY);
-  doc.text(timestamp, textX + 0.1, textY);
-  doc.text(timestamp, textX, textY - 0.1);
-  doc.text(timestamp, textX, textY + 0.1);
+  doc.text(timestamp, textX - 0.05, textY); // Changed from 0.1 to 0.05
+  doc.text(timestamp, textX + 0.05, textY); // Changed from 0.1 to 0.05
+  doc.text(timestamp, textX, textY - 0.05); // Changed from 0.1 to 0.05
+  doc.text(timestamp, textX, textY + 0.05); // Changed from 0.1 to 0.05
 
-  // Black text on top
+  // Black text on top (unchanged)
   doc.setTextColor(0, 0, 0);
   doc.text(timestamp, textX, textY);
 };
@@ -144,7 +144,6 @@ export const addImageToCard = (
         throw new Error("Invalid image format");
       }
     } catch (error) {
-      console.error("Error adding image for card", cardIndex + 1, ":", error);
       // Fallback: draw placeholder
       addImagePlaceholder(
         doc,

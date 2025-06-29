@@ -19,7 +19,10 @@ function truncateText(text: string, maxLength: number = 300): string {
   return text.substring(0, maxLength) + "...";
 }
 
-const getContentSpacing = (includeHeader: boolean, headerHeight: number): number => {
+const getContentSpacing = (
+  includeHeader: boolean,
+  headerHeight: number
+): number => {
   if (!includeHeader) {
     return 12; // Reduced spacing for default title
   } else {
@@ -85,7 +88,10 @@ export const generateA4Landscape3x2 = (
       const totalUsedWidth = cols * cardWidth + (cols - 1) * 15; // Change from 10 to 15
       const horizontalOffset = (pageWidth - 2 * margin - totalUsedWidth) / 2; // Center horizontally
       const cardX = margin + horizontalOffset + col * (cardWidth + 15); // Changed from +10 to +15
-      const cardY = headerHeight + getContentSpacing(includeHeader, headerHeight) + row * (cardHeight + 5); // Add +10
+      const cardY =
+        headerHeight +
+        getContentSpacing(includeHeader, headerHeight) +
+        row * (cardHeight + 5); // Add +10
 
       // Image area (touches side borders)
       const imageX = cardX; // Changed from cardX + 1
@@ -136,7 +142,14 @@ export const generateA4Landscape3x2 = (
     });
 
     // Add footer using common function
-    addFooterToDoc(doc, currentPage, totalPages, pageWidth, pageHeight, headerFooterMargin);
+    addFooterToDoc(
+      doc,
+      currentPage,
+      totalPages,
+      pageWidth,
+      pageHeight,
+      headerFooterMargin
+    );
   }
 
   return doc;
@@ -149,20 +162,13 @@ export const downloadA4Landscape3x2PDF = async (
   includeHeader: boolean = true
 ): Promise<string | null> => {
   try {
-    console.log("Starting A4Landscape3x2 PDF generation...");
-
     const doc = generateA4Landscape3x2(cards, headerData, includeHeader);
-
-    console.log("PDF document created, converting to base64...");
 
     const pdfDataUri = doc.output("datauristring");
     const base64Data = pdfDataUri.split(",")[1];
 
-    console.log("Base64 conversion complete, length:", base64Data.length);
-
     return base64Data;
   } catch (error) {
-    console.error("Error in downloadA4Landscape3x2PDF:", error);
     return null;
   }
 };

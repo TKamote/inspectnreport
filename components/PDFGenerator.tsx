@@ -155,14 +155,6 @@ export const generatePDF = async (
   onProgress?: (info: ProgressInfo) => void
 ): Promise<boolean> => {
   try {
-    console.log("=== GENERATE PDF START ===");
-    console.log("Options received:", {
-      cardsCount: options.cards.length,
-      template: options.template,
-      includeHeader: options.includeHeader,
-      headerData: options.headerData,
-    });
-
     if (onProgress)
       onProgress({ step: "init", message: "Starting PDF generation..." });
 
@@ -246,7 +238,6 @@ export const generatePDF = async (
       onProgress({ step: "complete", message: "PDF shared successfully!" });
     return true;
   } catch (error) {
-    console.error("PDF Generation Error:", error);
     if (onProgress) {
       onProgress({
         step: "complete",
@@ -322,70 +313,6 @@ export const generateTestPDF = async (
         }`,
       });
     }
-    return false;
-  }
-};
-
-// Add this debugging version temporarily:
-export const generatePDFDebug = async (
-  options: PDFGenerationOptions,
-  onProgress?: (info: ProgressInfo) => void
-): Promise<boolean> => {
-  try {
-    console.log("=== PDF DEBUG START ===");
-    console.log("Template:", options.template);
-    console.log("Cards count:", options.cards.length);
-    console.log("Include header:", options.includeHeader);
-
-    if (onProgress)
-      onProgress({ step: "init", message: "Starting PDF generation..." });
-
-    const processedCards = options.cards; // Skip image processing for now
-
-    console.log("Processed cards:", processedCards.length);
-
-    if (onProgress)
-      onProgress({ step: "generating", message: "Generating PDF content..." });
-
-    console.log("About to call generatePDFByTemplate...");
-    const base64Data = await generatePDFByTemplate({
-      ...options,
-      cards: processedCards,
-    });
-    console.log("PDF base64 data generated:", !!base64Data);
-
-    if (!base64Data) {
-      throw new Error("Failed to generate PDF base64 data");
-    }
-
-    if (onProgress)
-      onProgress({ step: "creating", message: "Creating PDF file..." });
-
-    console.log("Base64 data length:", base64Data.length);
-
-    const fileName = `PDF_debug_${Date.now()}.pdf`;
-    const newFilePath = `${FileSystem.documentDirectory}${fileName}`;
-    console.log("File path:", newFilePath);
-
-    await FileSystem.writeAsStringAsync(newFilePath, base64Data, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    console.log("File written successfully");
-
-    await Sharing.shareAsync(newFilePath, {
-      mimeType: "application/pdf",
-      dialogTitle: "Debug PDF",
-    });
-    console.log("=== PDF DEBUG SUCCESS ===");
-
-    return true;
-  } catch (error) {
-    console.error("=== PDF DEBUG ERROR ===");
-    console.error("Error details:", error);
-    console.error(
-      "Error stack:",
-      error instanceof Error ? error.stack : "No stack"
-    );
     return false;
   }
 };
