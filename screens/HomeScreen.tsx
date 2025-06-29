@@ -117,31 +117,33 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 15,
+    padding: 20, // Increased from 15 to 20
+    paddingTop: 40, // Added extra top padding
     backgroundColor: "#fff",
   },
   description: {
-    fontSize: 18,
+    fontSize: 19, // Increased from 18 to 19
     color: COLORS.MIDNIGHT,
-    marginBottom: 20,
+    marginBottom: 25, // Increased from 20 to 25
     textAlign: "center",
   },
   templateOption: {
-    padding: 12,
+    padding: 16, // Increased from 12 to 16
     borderWidth: 1,
     borderColor: COLORS.BORDER,
     borderRadius: 5,
-    marginBottom: 12,
+    marginBottom: 16, // Increased from 12 to 16
     backgroundColor: "#f9f9f9",
   },
   templateTitle: {
-    fontSize: 16,
+    fontSize: 17, // Increased from 16 to 17
     fontWeight: "bold",
     color: COLORS.MIDNIGHT,
-    marginBottom: 5,
+    marginBottom: 8, // Increased from 5 to 8
   },
   templateDescription: {
-    fontSize: 12,
+    fontSize: 13, // Increased from 12 to 13
     color: COLORS.SPACE,
+    lineHeight: 18, // Added line height for better readability
   },
 });
