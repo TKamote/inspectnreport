@@ -105,23 +105,18 @@ const processCardsWithCompressedImages = async (
           photo: compressedBase64Image,
         };
         processedCount++;
-      } catch (error) {
-        // Error handling: You might want to set photo to null or a placeholder
-        // and potentially notify the user or log the specific card that failed.
-        // For now, it just skips, as in your original code.
-      }
+      } catch (error) {}
     }
   }
   return processedCards;
 };
 
 // UPDATED: Main generator function now returns jsPDF objects
-const generatePDFByTemplate = async (options: PDFGenerationOptions): Promise<string | null> => {
+const generatePDFByTemplate = async (
+  options: PDFGenerationOptions
+): Promise<string | null> => {
   const { cards, headerData, template, includeHeader } = options;
-  
-  console.log('generatePDFByTemplate called with template:', template);
-  console.log('Cards count:', cards.length);
-  
+
   try {
     switch (template) {
       case "A4Portrait2x2":
@@ -129,16 +124,27 @@ const generatePDFByTemplate = async (options: PDFGenerationOptions): Promise<str
       case "A4Portrait2x3":
         return await downloadA4Portrait2x3PDF(cards, headerData, includeHeader);
       case "A4Landscape3x2":
-        return await downloadA4Landscape3x2PDF(cards, headerData, includeHeader);
+        return await downloadA4Landscape3x2PDF(
+          cards,
+          headerData,
+          includeHeader
+        );
       case "A4Landscape4x2":
-        return await downloadA4Landscape4x2PDF(cards, headerData, includeHeader);
+        return await downloadA4Landscape4x2PDF(
+          cards,
+          headerData,
+          includeHeader
+        );
       case "A4Landscape5x2":
-        return await downloadA4Landscape5x2PDF(cards, headerData, includeHeader);
+        return await downloadA4Landscape5x2PDF(
+          cards,
+          headerData,
+          includeHeader
+        );
       default:
         return await downloadA4Portrait2x2PDF(cards, headerData, includeHeader);
     }
   } catch (error) {
-    console.error('Error in generatePDFByTemplate:', error);
     return null;
   }
 };
@@ -149,21 +155,21 @@ export const generatePDF = async (
   onProgress?: (info: ProgressInfo) => void
 ): Promise<boolean> => {
   try {
-    console.log('=== GENERATE PDF START ===');
-    console.log('Options received:', {
+    console.log("=== GENERATE PDF START ===");
+    console.log("Options received:", {
       cardsCount: options.cards.length,
       template: options.template,
       includeHeader: options.includeHeader,
-      headerData: options.headerData
+      headerData: options.headerData,
     });
-    
+
     if (onProgress)
       onProgress({ step: "init", message: "Starting PDF generation..." });
 
     const imagesToProcessCount = options.cards.filter(
       (card: CardData) => card.photo
     ).length;
-    
+
     if (onProgress) {
       onProgress({
         step: "compressing",
@@ -194,7 +200,7 @@ export const generatePDF = async (
 
     if (onProgress)
       onProgress({ step: "generating", message: "Generating PDF content..." });
-    
+
     // Generate base64 data instead of jsPDF object
     const base64Data = await generatePDFByTemplate({
       ...options,
@@ -202,7 +208,7 @@ export const generatePDF = async (
     });
 
     if (!base64Data) {
-      throw new Error('Failed to generate PDF data');
+      throw new Error("Failed to generate PDF data");
     }
 
     if (onProgress)
@@ -229,7 +235,7 @@ export const generatePDF = async (
       dialogTitle:
         Platform.OS === "ios" ? fileName : "Save or Share PDF Report",
     };
-    
+
     if (Platform.OS === "ios") {
       shareOptions.UTI = ".pdf";
     }
@@ -239,9 +245,8 @@ export const generatePDF = async (
     if (onProgress)
       onProgress({ step: "complete", message: "PDF shared successfully!" });
     return true;
-    
   } catch (error) {
-    console.error('PDF Generation Error:', error);
+    console.error("PDF Generation Error:", error);
     if (onProgress) {
       onProgress({
         step: "complete",
@@ -327,59 +332,60 @@ export const generatePDFDebug = async (
   onProgress?: (info: ProgressInfo) => void
 ): Promise<boolean> => {
   try {
-    console.log('=== PDF DEBUG START ===');
-    console.log('Template:', options.template);
-    console.log('Cards count:', options.cards.length);
-    console.log('Include header:', options.includeHeader);
+    console.log("=== PDF DEBUG START ===");
+    console.log("Template:", options.template);
+    console.log("Cards count:", options.cards.length);
+    console.log("Include header:", options.includeHeader);
 
     if (onProgress)
       onProgress({ step: "init", message: "Starting PDF generation..." });
 
     const processedCards = options.cards; // Skip image processing for now
 
-    console.log('Processed cards:', processedCards.length);
+    console.log("Processed cards:", processedCards.length);
 
     if (onProgress)
       onProgress({ step: "generating", message: "Generating PDF content..." });
-    
-    console.log('About to call generatePDFByTemplate...');
+
+    console.log("About to call generatePDFByTemplate...");
     const base64Data = await generatePDFByTemplate({
       ...options,
       cards: processedCards,
     });
-    console.log('PDF base64 data generated:', !!base64Data);
+    console.log("PDF base64 data generated:", !!base64Data);
 
     if (!base64Data) {
-      throw new Error('Failed to generate PDF base64 data');
+      throw new Error("Failed to generate PDF base64 data");
     }
 
     if (onProgress)
       onProgress({ step: "creating", message: "Creating PDF file..." });
 
-    console.log('Base64 data length:', base64Data.length);
-    
+    console.log("Base64 data length:", base64Data.length);
+
     const fileName = `PDF_debug_${Date.now()}.pdf`;
     const newFilePath = `${FileSystem.documentDirectory}${fileName}`;
-    console.log('File path:', newFilePath);
+    console.log("File path:", newFilePath);
 
     await FileSystem.writeAsStringAsync(newFilePath, base64Data, {
       encoding: FileSystem.EncodingType.Base64,
     });
-    console.log('File written successfully');
+    console.log("File written successfully");
 
     await Sharing.shareAsync(newFilePath, {
       mimeType: "application/pdf",
       dialogTitle: "Debug PDF",
     });
-    console.log('=== PDF DEBUG SUCCESS ===');
+    console.log("=== PDF DEBUG SUCCESS ===");
 
     return true;
-    
   } catch (error) {
-    console.error('=== PDF DEBUG ERROR ===');
-    console.error('Error details:', error);
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
+    console.error("=== PDF DEBUG ERROR ===");
+    console.error("Error details:", error);
+    console.error(
+      "Error stack:",
+      error instanceof Error ? error.stack : "No stack"
+    );
     return false;
   }
 };
-

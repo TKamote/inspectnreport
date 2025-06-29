@@ -17,7 +17,7 @@ export const addHeaderToDoc = (
   headerData: HeaderData,
   pageWidth: number,
   includeHeader: boolean,
-  margin: number = 15
+  margin: number = 20 // Changed from 15 to 20 (5mm more on each side)
 ): number => {
   if (!includeHeader) {
     // Minimal header - just title with reduced spacing
@@ -58,11 +58,6 @@ export const addHeaderToDoc = (
   const titleWidth = doc.getTextWidth(title);
   doc.text(title, (pageWidth - titleWidth) / 2, 31);
   
-  // Header line closer to title
-  doc.setLineWidth(0.5);
-  doc.setDrawColor(...PDF_COLORS.gray);
-  doc.line(margin, 35, pageWidth - margin, 35);
-  
   return 10; // Content spacing as requested
 };
 
@@ -73,7 +68,7 @@ export const addFooterToDoc = (
   totalPages: number,
   pageWidth: number,
   pageHeight: number,
-  margin: number = 15
+  margin: number = 20 // Changed from 15 to 20
 ): void => {
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
@@ -142,9 +137,7 @@ export const addImageToCard = (
     try {
       // Check if photo is valid base64
       if (photo.startsWith('data:image/')) {
-        console.log(`Adding image for card ${cardIndex + 1}`);
         doc.addImage(photo, 'JPEG', imageX, imageY, imageWidth, imageHeight);
-        console.log('Image added successfully');
       } else {
         throw new Error('Invalid image format');
       }
@@ -154,8 +147,6 @@ export const addImageToCard = (
       addImagePlaceholder(doc, imageX, imageY, imageWidth, imageHeight, 'Image Error');
     }
   } else {
-    // No image placeholder
-    console.log(`No image for card ${cardIndex + 1}, using placeholder`);
     addImagePlaceholder(doc, imageX, imageY, imageWidth, imageHeight, 'No Image');
   }
 };

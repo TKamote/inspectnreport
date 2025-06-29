@@ -51,11 +51,13 @@ export const generateA4Portrait2x2 = (
     // Calculate available space for cards
     const availableHeight = pageHeight - headerHeight - footerHeight - margin;
     const cardWidth = ((pageWidth - 2 * margin - 20) / cols) * 0.83; //
-    const cardHeight = (availableHeight - 30) / rows; // Reduce available height by 30 instead
 
     // Image dimensions (3:4 ratio - tall images)
     const imageWidth = cardWidth; // Full width minus 1px padding each side
     const imageHeight = imageWidth * 1.33; // 3:4 ratio (taller images)
+
+    // THEN use imageHeight in cardHeight:
+    const cardHeight = imageHeight + 25; // Image-driven but minimal space
 
     // Get cards for this page
     const startIndex = pageIndex * cardsPerPage;
@@ -110,7 +112,7 @@ export const generateA4Portrait2x2 = (
         doc,
         cardX,
         obsY,
-        cardWidth,
+        cardWidth - 2,
         obsHeight,
         card.observations
       );
@@ -133,20 +135,13 @@ export const downloadA4Portrait2x2PDF = async (
   includeHeader: boolean = true
 ): Promise<string | null> => {
   try {
-    console.log("Starting A4Portrait2x2 PDF generation...");
-
     const doc = generateA4Portrait2x2(cards, headerData, includeHeader);
-
-    console.log("PDF document created, converting to base64...");
 
     const pdfDataUri = doc.output("datauristring");
     const base64Data = pdfDataUri.split(",")[1];
 
-    console.log("Base64 conversion complete, length:", base64Data.length);
-
     return base64Data;
   } catch (error) {
-    console.error("Error in downloadA4Portrait2x2PDF:", error);
     return null;
   }
 };

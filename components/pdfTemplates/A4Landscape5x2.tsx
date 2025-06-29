@@ -51,12 +51,12 @@ export const generateA4Landscape5x2 = (
     
     // Calculate available space for cards
     const availableHeight = pageHeight - headerHeight - footerHeight - margin;
-    const cardWidth = (pageWidth - (2 * margin) - 40) / cols; // 40mm gap between columns
-    const cardHeight = ((availableHeight - 10) / rows) * 0.95; // Reduced by 5%
+    const cardWidth = ((pageWidth - 2 * margin - 32) / cols) * 0.90; // Changed from fixed calculation, reserve 32mm for 4×8mm gaps
     
     // Image dimensions (3:4 ratio - tall images)
-    const imageWidth = cardWidth - 2; // Full width minus 1px padding each side
-    const imageHeight = imageWidth * 1.33; // 3:4 ratio (taller images)
+    const imageWidth = cardWidth; // Remove the -2 padding
+    const imageHeight = imageWidth * 1.33; // Keep 3:4 ratio (portrait images)
+    const cardHeight = imageHeight + 24; // Changed from +25 to +24 (regain 1px)
     
     // Get cards for this page
     const startIndex = pageIndex * cardsPerPage;
@@ -67,12 +67,14 @@ export const generateA4Landscape5x2 = (
       const col = cardIndex % cols;
       const row = Math.floor(cardIndex / cols);
       
-      const cardX = margin + col * (cardWidth + 10);
-      const cardY = headerHeight + margin + row * (cardHeight + 5);
+      const totalUsedWidth = cols * cardWidth + (cols - 1) * 8; // Use 8mm gaps (reduced from 10mm)
+      const horizontalOffset = (pageWidth - 2 * margin - totalUsedWidth) / 2; // Center horizontally
+      const cardX = margin + horizontalOffset + col * (cardWidth + 8); // Add horizontal offset with 8mm gaps;
+      const cardY = headerHeight + margin + 10 + row * (cardHeight + 2); // Changed from +5 to +2 (regain 3px per row)
       
       // Image area (touches side borders)
-      const imageX = cardX + 1; // Start at card edge + 1px padding
-      const imageY = cardY + 12;
+      const imageX = cardX; // Remove the +1 padding
+      const imageY = cardY + 8; // Change from 12 to 8
       
       // Add card header
       addCardHeader(doc, cardX, cardY, cardWidth, card.location, startIndex + cardIndex + 1);
@@ -86,11 +88,11 @@ export const generateA4Landscape5x2 = (
       }
       
       // Observations section
-      const obsY = imageY + imageHeight + 3;
-      const obsHeight = cardY + cardHeight - obsY - 2;
+      const obsY = imageY + imageHeight + 2; // Change from +3 to +2
+      const obsHeight = cardY + cardHeight - obsY; // Remove the -2
       
       // Add observations section
-      addObservationsSection(doc, cardX, obsY, cardWidth, obsHeight, card.observations);
+      addObservationsSection(doc, cardX, obsY, cardWidth - 2, obsHeight, card.observations); // Add -2 to cardWidth
       
       // Add final card border (at the very end)
       addCardBorder(doc, cardX, cardY, cardWidth, cardHeight);
